@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
-#include "RussellSurvivalHUD.generated.h"
+#include "SurvivalHUD.generated.h"
 
 UCLASS()
-class ZOMBIESHOOTING_API ARussellSurvivalHUD : public AHUD
+class ZOMBIESHOOTING_API ASurvivalHUD : public AHUD
 {
 	GENERATED_BODY()
 
 public:
-	ARussellSurvivalHUD();
+	ASurvivalHUD();
 
 	virtual void DrawHUD() override;
 
@@ -54,3 +54,4 @@ protected:
 	float SmoothedFrameTimeMs;
 	float SmoothedFPS;
 };
+

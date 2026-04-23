@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "RussellZombieCharacter.h"
+#include "ZombieCharacter.h"
 #include "ZombieShootingGameMode.generated.h"
 
-class ARussellWeaponPickup;
+class AWeaponPickup;
 
 UCLASS()
 class ZOMBIESHOOTING_API AZombieShootingGameMode : public AGameModeBase
@@ -20,7 +20,7 @@ public:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Waves")
-	void NotifyZombieKilled(ARussellZombieCharacter* Zombie);
+	void NotifyZombieKilled();
 
 	UFUNCTION(BlueprintCallable, Category = "Waves")
 	void RestartCurrentLevel();
@@ -36,10 +36,10 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Waves")
-	TSubclassOf<ARussellZombieCharacter> ZombieClass;
+	TSubclassOf<AZombieCharacter> ZombieClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Waves|Variants")
-	TArray<FRussellZombieVariantDefinition> ZombieVariants;
+	TArray<FZombieVariantDefinition> ZombieVariants;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Waves", meta = (ClampMin = "1"))
 	int32 InitialZombiesPerWave;
@@ -60,7 +60,7 @@ protected:
 	float NextWaveDelay;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Pickup")
-	TSubclassOf<ARussellWeaponPickup> WeaponPickupClass;
+	TSubclassOf<AWeaponPickup> WeaponPickupClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Pickup", meta = (ClampMin = "0.0"))
 	float WeaponPickupSpawnDelay;
@@ -127,7 +127,7 @@ protected:
 	void SpawnWeaponPickup();
 	FVector FindSpawnLocation() const;
 	FVector FindWeaponPickupLocation() const;
-	const FRussellZombieVariantDefinition* ChooseZombieVariant() const;
+	const FZombieVariantDefinition* ChooseZombieVariant() const;
 	void BuildDefaultZombieVariants();
 	void ApplyPerformanceProfile();
 	void WarmUpZombieVariantAssets();
@@ -143,3 +143,4 @@ private:
 	int32 SpawnedThisWave;
 	int32 TargetZombiesThisWave;
 };
+

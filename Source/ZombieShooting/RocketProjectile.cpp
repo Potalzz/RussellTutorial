@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RussellMissileProjectile.h"
+#include "RocketProjectile.h"
 
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -14,7 +14,7 @@
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 
-ARussellMissileProjectile::ARussellMissileProjectile()
+ARocketProjectile::ARocketProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	InitialLifeSpan = 5.0f;
@@ -79,10 +79,10 @@ ARussellMissileProjectile::ARussellMissileProjectile()
 		ExplosionEffect = ExplosionAsset.Object;
 	}
 
-	CollisionComponent->OnComponentHit.AddDynamic(this, &ARussellMissileProjectile::HandleHit);
+	CollisionComponent->OnComponentHit.AddDynamic(this, &ARocketProjectile::HandleHit);
 }
 
-void ARussellMissileProjectile::InitializeProjectile(AActor* NewOwner, AController* NewDamageInstigator, float NewDamage, float NewExplosionRadius)
+void ARocketProjectile::InitializeProjectile(AActor* NewOwner, AController* NewDamageInstigator, float NewDamage, float NewExplosionRadius)
 {
 	if (NewOwner)
 	{
@@ -102,7 +102,7 @@ void ARussellMissileProjectile::InitializeProjectile(AActor* NewOwner, AControll
 	ExplosionRadius = NewExplosionRadius;
 }
 
-void ARussellMissileProjectile::HandleHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+void ARocketProjectile::HandleHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (bExploded || OtherActor == GetOwner())
 	{
@@ -113,7 +113,7 @@ void ARussellMissileProjectile::HandleHit(UPrimitiveComponent* HitComponent, AAc
 	Explode(ExplosionLocation);
 }
 
-void ARussellMissileProjectile::Explode(const FVector& ExplosionLocation)
+void ARocketProjectile::Explode(const FVector& ExplosionLocation)
 {
 	if (bExploded)
 	{
@@ -139,7 +139,7 @@ void ARussellMissileProjectile::Explode(const FVector& ExplosionLocation)
 	Destroy();
 }
 
-void ARussellMissileProjectile::SpawnExplosionFX(UWorld* World, const FVector& ExplosionLocation) const
+void ARocketProjectile::SpawnExplosionFX(UWorld* World, const FVector& ExplosionLocation) const
 {
 	if (!World || !ExplosionEffect)
 	{
@@ -165,3 +165,4 @@ void ARussellMissileProjectile::SpawnExplosionFX(UWorld* World, const FVector& E
 		World->GetTimerManager().SetTimer(StopFxHandle, StopFxDelegate, ExplosionEffectStopDelay, false);
 	}
 }
+

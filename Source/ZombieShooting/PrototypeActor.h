@@ -4,14 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "MyActor.generated.h"
+#include "PrototypeActor.generated.h"
 
 UCLASS()
-class ZOMBIESHOOTING_API AMyActor : public AActor
+class ZOMBIESHOOTING_API APrototypeActor : public AActor
 {
     GENERATED_BODY()
 
 public:
     // Sets default values for this actor's properties
-    AMyActor();
+    APrototypeActor();
 };
+

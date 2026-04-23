@@ -4,26 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "RussellShotgunComponent.generated.h"
+#include "WeaponComponent.generated.h"
 
-class ARussellMissileProjectile;
+class ARocketProjectile;
 class UNiagaraComponent;
 class UNiagaraSystem;
 
 UENUM(BlueprintType)
-enum class ERussellWeaponMode : uint8
+enum class EWeaponMode : uint8
 {
 	Shotgun UMETA(DisplayName = "Shotgun"),
 	RPG7 UMETA(DisplayName = "RPG7")
 };
 
-UCLASS(ClassGroup=(Russell), meta=(BlueprintSpawnableComponent))
-class ZOMBIESHOOTING_API URussellShotgunComponent : public UActorComponent
+UCLASS(ClassGroup=(Weapon), meta=(BlueprintSpawnableComponent))
+class ZOMBIESHOOTING_API UWeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	URussellShotgunComponent();
+	UWeaponComponent();
 
 	virtual void BeginPlay() override;
 
@@ -43,7 +43,7 @@ public:
 	float FireInterval;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	ERussellWeaponMode WeaponMode;
+	EWeaponMode WeaponMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun", meta = (ClampMin = "1"))
 	int32 MaxAmmo;
@@ -76,7 +76,7 @@ public:
 	float RPG7FireInterval;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RPG7|Projectile")
-	TSubclassOf<ARussellMissileProjectile> MissileProjectileClass;
+	TSubclassOf<ARocketProjectile> MissileProjectileClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RPG7|Projectile", meta = (ClampMin = "1.0"))
 	float MissileDamage;
@@ -124,13 +124,13 @@ public:
 	bool HasInfiniteAmmo() const { return bInfiniteAmmo; }
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void SetWeaponMode(ERussellWeaponMode NewWeaponMode);
+	void SetWeaponMode(EWeaponMode NewWeaponMode);
 
 	UFUNCTION(BlueprintPure, Category = "Weapon")
-	ERussellWeaponMode GetWeaponMode() const { return WeaponMode; }
+	EWeaponMode GetWeaponMode() const { return WeaponMode; }
 
 	UFUNCTION(BlueprintPure, Category = "Weapon")
-	bool IsUsingRPG7() const { return WeaponMode == ERussellWeaponMode::RPG7; }
+	bool IsUsingRPG7() const { return WeaponMode == EWeaponMode::RPG7; }
 
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	FString GetWeaponModeLabel() const;
@@ -148,3 +148,4 @@ private:
 	UNiagaraComponent* SpawnNiagaraFX(UWorld* World, UNiagaraSystem* NiagaraSystem, const FVector& Location, const FRotator& Rotation, float Scale, float AutoDeactivateDelay = 0.0f) const;
 	float GetActiveFireInterval() const;
 };
+

@@ -1,15 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Chracter_CPlusPlus.h"
+#include "SpawnTestCharacter.h"
 
 // Sets default values
-AChracter_CPlusPlus::AChracter_CPlusPlus()
+ASpawnTestCharacter::ASpawnTestCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void AChracter_CPlusPlus::SpawnActor()
+void ASpawnTestCharacter::SpawnActor()
 {
 	if (!ActorBPToSpawn)
 	{
@@ -27,3 +27,4 @@ void AChracter_CPlusPlus::SpawnActor()
 
 	World->SpawnActor<AActor>(ActorBPToSpawn, GetActorTransform(), spawnParams);
 }
+

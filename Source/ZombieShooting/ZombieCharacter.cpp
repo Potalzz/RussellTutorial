@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RussellZombieCharacter.h"
+#include "ZombieCharacter.h"
 
 #include "Animation/AnimSequence.h"
 #include "AIController.h"
@@ -13,16 +13,16 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
-#include "RussellHealthComponent.h"
+#include "CombatHealthComponent.h"
 #include "ZombieShootingGameMode.h"
 #include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 
-ARussellZombieCharacter::ARussellZombieCharacter()
+AZombieCharacter::AZombieCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	HealthComponent = CreateDefaultSubobject<URussellHealthComponent>(TEXT("HealthComponent"));
+	HealthComponent = CreateDefaultSubobject<UCombatHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->MaxHealth = 80.0f;
 
 	WalkSpeed = 180.0f;
@@ -108,11 +108,15 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 	PrimaryActorTick.TickInterval = ZombieTickInterval;
 }
 
-void ARussellZombieCharacter::BeginPlay()
+void AZombieCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	HealthComponent->OnHealthDepleted.AddDynamic(this, &ARussellZombieCharacter::HandleHealthDepleted);
+	if (HealthComponent)
+	{
+		HealthComponent->OnHealthDepleted.AddDynamic(this, &AZombieCharacter::HandleHealthDepleted);
+	}
+
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	SetActorTickInterval(ZombieTickInterval);
 
@@ -123,7 +127,7 @@ void ARussellZombieCharacter::BeginPlay()
 	}
 }
 
-void ARussellZombieCharacter::Tick(float DeltaSeconds)
+void AZombieCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
@@ -139,14 +143,20 @@ void ARussellZombieCharacter::Tick(float DeltaSeconds)
 
 	if (TargetPlayer)
 	{
-		ChaseTarget(DeltaSeconds);
+		ChaseTarget();
 	}
 }
 
-float ARussellZombieCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+float AZombieCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	const float AppliedDamage = HealthComponent->ApplyDamage(DamageAmount);
+	if (!HealthComponent)
+	{
+		return ActualDamage;
+	}
+
+	const float DamageToApply = ActualDamage > 0.0f ? ActualDamage : DamageAmount;
+	const float AppliedDamage = HealthComponent->ApplyDamage(DamageToApply);
 
 	if (AppliedDamage > 0.0f)
 	{
@@ -160,14 +170,14 @@ float ARussellZombieCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 		{
 			PlayAnimation(HitAnimation, false);
 			const float ResumeDelay = FMath::Min(HitAnimation->GetPlayLength(), 0.35f);
-			GetWorldTimerManager().SetTimer(ResumeWalkTimerHandle, this, &ARussellZombieCharacter::ResumeLocomotionAnimation, ResumeDelay, false);
+			GetWorldTimerManager().SetTimer(ResumeWalkTimerHandle, this, &AZombieCharacter::ResumeLocomotionAnimation, ResumeDelay, false);
 		}
 	}
 
 	return AppliedDamage > 0.0f ? AppliedDamage : ActualDamage;
 }
 
-void ARussellZombieCharacter::HandleHealthDepleted()
+void AZombieCharacter::HandleHealthDepleted()
 {
 	if (bIsDead)
 	{
@@ -178,6 +188,12 @@ void ARussellZombieCharacter::HandleHealthDepleted()
 	GetWorldTimerManager().ClearTimer(ResumeWalkTimerHandle);
 	SetActorTickEnabled(false);
 	GetCharacterMovement()->DisableMovement();
+
+	if (AAIController* AIController = Cast<AAIController>(GetController()))
+	{
+		AIController->StopMovement();
+	}
+
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -188,17 +204,17 @@ void ARussellZombieCharacter::HandleHealthDepleted()
 	{
 		if (AZombieShootingGameMode* GameMode = World->GetAuthGameMode<AZombieShootingGameMode>())
 		{
-			GameMode->NotifyZombieKilled(this);
+			GameMode->NotifyZombieKilled();
 		}
 	}
 }
 
-void ARussellZombieCharacter::AcquireTarget()
+void AZombieCharacter::AcquireTarget()
 {
 	TargetPlayer = UGameplayStatics::GetPlayerCharacter(this, 0);
 }
 
-void ARussellZombieCharacter::ChaseTarget(float DeltaSeconds)
+void AZombieCharacter::ChaseTarget()
 {
 	if (!TargetPlayer)
 	{
@@ -250,7 +266,7 @@ void ARussellZombieCharacter::ChaseTarget(float DeltaSeconds)
 	}
 }
 
-void ARussellZombieCharacter::AttackTarget()
+void AZombieCharacter::AttackTarget()
 {
 	UWorld* World = GetWorld();
 	if (!World || !TargetPlayer)
@@ -268,12 +284,12 @@ void ARussellZombieCharacter::AttackTarget()
 	{
 		PlayAnimation(AttackAnimation, false);
 		const float ResumeDelay = FMath::Min(AttackAnimation->GetPlayLength(), AttackInterval);
-		GetWorldTimerManager().SetTimer(ResumeWalkTimerHandle, this, &ARussellZombieCharacter::ResumeLocomotionAnimation, ResumeDelay, false);
+		GetWorldTimerManager().SetTimer(ResumeWalkTimerHandle, this, &AZombieCharacter::ResumeLocomotionAnimation, ResumeDelay, false);
 	}
 	TargetPlayer->TakeDamage(AttackDamage, FDamageEvent(), GetController(), this);
 }
 
-void ARussellZombieCharacter::PlayAnimation(UAnimSequence* Animation, bool bLooping)
+void AZombieCharacter::PlayAnimation(UAnimSequence* Animation, bool bLooping)
 {
 	if (!Animation || !GetMesh())
 	{
@@ -284,7 +300,7 @@ void ARussellZombieCharacter::PlayAnimation(UAnimSequence* Animation, bool bLoop
 	GetMesh()->PlayAnimation(Animation, bLooping);
 }
 
-void ARussellZombieCharacter::ResumeLocomotionAnimation()
+void AZombieCharacter::ResumeLocomotionAnimation()
 {
 	bIsSpawnAnimationActive = false;
 
@@ -294,7 +310,7 @@ void ARussellZombieCharacter::ResumeLocomotionAnimation()
 	}
 }
 
-void ARussellZombieCharacter::SpawnBloodHitFX(const FDamageEvent& DamageEvent)
+void AZombieCharacter::SpawnBloodHitFX(const FDamageEvent& DamageEvent)
 {
 	UWorld* World = GetWorld();
 	if (!World || !bShowBloodHitFX)
@@ -385,7 +401,7 @@ void ARussellZombieCharacter::SpawnBloodHitFX(const FDamageEvent& DamageEvent)
 	}
 }
 
-void ARussellZombieCharacter::ApplyVariantDefinition(const FRussellZombieVariantDefinition& VariantDefinition)
+void AZombieCharacter::ApplyVariantDefinition(const FZombieVariantDefinition& VariantDefinition)
 {
 	CurrentVariantId = VariantDefinition.VariantId.IsNone() ? TEXT("unnamed_variant") : VariantDefinition.VariantId;
 
@@ -458,7 +474,7 @@ void ARussellZombieCharacter::ApplyVariantDefinition(const FRussellZombieVariant
 	}
 }
 
-UAnimSequence* ARussellZombieCharacter::ChooseRandomAnimation(const TArray<TObjectPtr<UAnimSequence>>& AnimationOptions) const
+UAnimSequence* AZombieCharacter::ChooseRandomAnimation(const TArray<TObjectPtr<UAnimSequence>>& AnimationOptions) const
 {
 	if (AnimationOptions.IsEmpty())
 	{
@@ -468,7 +484,7 @@ UAnimSequence* ARussellZombieCharacter::ChooseRandomAnimation(const TArray<TObje
 	return AnimationOptions[FMath::RandHelper(AnimationOptions.Num())];
 }
 
-void ARussellZombieCharacter::LoadAnimationOptions(const TArray<TSoftObjectPtr<UAnimSequence>>& SoftAnimations, TArray<TObjectPtr<UAnimSequence>>& LoadedAnimations)
+void AZombieCharacter::LoadAnimationOptions(const TArray<TSoftObjectPtr<UAnimSequence>>& SoftAnimations, TArray<TObjectPtr<UAnimSequence>>& LoadedAnimations)
 {
 	LoadedAnimations.Reset();
 
@@ -481,7 +497,7 @@ void ARussellZombieCharacter::LoadAnimationOptions(const TArray<TSoftObjectPtr<U
 	}
 }
 
-bool ARussellZombieCharacter::PlaySpawnAnimationIfNeeded()
+bool AZombieCharacter::PlaySpawnAnimationIfNeeded()
 {
 	if (UAnimSequence* SpawnAnimation = ChooseRandomAnimation(SpawnAnimationOptions))
 	{
@@ -490,7 +506,7 @@ bool ARussellZombieCharacter::PlaySpawnAnimationIfNeeded()
 		GetWorldTimerManager().SetTimer(
 			ResumeWalkTimerHandle,
 			this,
-			&ARussellZombieCharacter::ResumeLocomotionAnimation,
+			&AZombieCharacter::ResumeLocomotionAnimation,
 			SpawnAnimation->GetPlayLength(),
 			false);
 		return true;
@@ -498,3 +514,4 @@ bool ARussellZombieCharacter::PlaySpawnAnimationIfNeeded()
 
 	return false;
 }
+

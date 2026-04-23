@@ -4,19 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "RussellWeaponPickup.generated.h"
+#include "WeaponComponent.h"
+#include "WeaponPickup.generated.h"
 
 class UNiagaraComponent;
 class USceneComponent;
 class USphereComponent;
 
 UCLASS()
-class ZOMBIESHOOTING_API ARussellWeaponPickup : public AActor
+class ZOMBIESHOOTING_API AWeaponPickup : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	ARussellWeaponPickup();
+	AWeaponPickup();
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
@@ -33,6 +34,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup", meta = (ClampMin = "1.0"))
 	float CollisionRadius;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup|Weapon")
+	EWeaponMode PickupWeaponMode;
+
 	UFUNCTION()
 	void HandlePickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
@@ -41,3 +45,4 @@ private:
 
 	void RefreshPickupCollision();
 };
+

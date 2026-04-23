@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "RussellHealthComponent.generated.h"
+#include "CombatHealthComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRussellHealthChangedSignature, float, CurrentHealth, float, MaxHealth);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRussellHealthDepletedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHealthChangedSignature, float, CurrentHealth, float, MaxHealth);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHealthDepletedSignature);
 
-UCLASS(ClassGroup=(Russell), meta=(BlueprintSpawnableComponent))
-class ZOMBIESHOOTING_API URussellHealthComponent : public UActorComponent
+UCLASS(ClassGroup=(Combat), meta=(BlueprintSpawnableComponent))
+class ZOMBIESHOOTING_API UCombatHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	URussellHealthComponent();
+	UCombatHealthComponent();
 
 	virtual void BeginPlay() override;
 
@@ -26,10 +26,10 @@ public:
 	float CurrentHealth;
 
 	UPROPERTY(BlueprintAssignable, Category = "Health")
-	FRussellHealthChangedSignature OnHealthChanged;
+	FHealthChangedSignature OnHealthChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "Health")
-	FRussellHealthDepletedSignature OnHealthDepleted;
+	FHealthDepletedSignature OnHealthDepleted;
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void ResetHealth();
@@ -46,3 +46,4 @@ public:
 private:
 	bool bIsDead;
 };
+

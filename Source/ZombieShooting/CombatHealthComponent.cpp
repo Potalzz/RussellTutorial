@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RussellHealthComponent.h"
+#include "CombatHealthComponent.h"
 
-URussellHealthComponent::URussellHealthComponent()
+UCombatHealthComponent::UCombatHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
@@ -11,21 +11,21 @@ URussellHealthComponent::URussellHealthComponent()
 	bIsDead = false;
 }
 
-void URussellHealthComponent::BeginPlay()
+void UCombatHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	ResetHealth();
 }
 
-void URussellHealthComponent::ResetHealth()
+void UCombatHealthComponent::ResetHealth()
 {
 	bIsDead = false;
 	CurrentHealth = MaxHealth;
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 
-float URussellHealthComponent::ApplyDamage(float DamageAmount)
+float UCombatHealthComponent::ApplyDamage(float DamageAmount)
 {
 	if (bIsDead || DamageAmount <= 0.0f)
 	{
@@ -47,7 +47,8 @@ float URussellHealthComponent::ApplyDamage(float DamageAmount)
 	return ActualDamage;
 }
 
-float URussellHealthComponent::GetHealthPercent() const
+float UCombatHealthComponent::GetHealthPercent() const
 {
 	return MaxHealth > 0.0f ? CurrentHealth / MaxHealth : 0.0f;
 }
+

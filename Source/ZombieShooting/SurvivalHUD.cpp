@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RussellSurvivalHUD.h"
+#include "SurvivalHUD.h"
 
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
-#include "RussellFirstPersonCharacter.h"
+#include "ZombiePlayerCharacter.h"
 #include "ZombieShootingGameMode.h"
 
-ARussellSurvivalHUD::ARussellSurvivalHUD()
+ASurvivalHUD::ASurvivalHUD()
 {
 	TextColor = FLinearColor::White;
 	WarningColor = FLinearColor(1.0f, 0.25f, 0.2f, 1.0f);
@@ -24,7 +24,7 @@ ARussellSurvivalHUD::ARussellSurvivalHUD()
 	SmoothedFPS = 0.0f;
 }
 
-void ARussellSurvivalHUD::DrawHUD()
+void ASurvivalHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
@@ -34,7 +34,7 @@ void ARussellSurvivalHUD::DrawHUD()
 	}
 
 	APlayerController* PlayerController = GetOwningPlayerController();
-	ARussellFirstPersonCharacter* PlayerCharacter = PlayerController ? Cast<ARussellFirstPersonCharacter>(PlayerController->GetPawn()) : nullptr;
+	AZombiePlayerCharacter* PlayerCharacter = PlayerController ? Cast<AZombiePlayerCharacter>(PlayerController->GetPawn()) : nullptr;
 	AZombieShootingGameMode* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AZombieShootingGameMode>() : nullptr;
 
 	if (PlayerCharacter)
@@ -70,12 +70,12 @@ void ARussellSurvivalHUD::DrawHUD()
 	DrawTopRightStatusLine(FString::Printf(TEXT("Frame: %.1f ms"), SmoothedFrameTimeMs), 1, PerformanceColor);
 }
 
-void ARussellSurvivalHUD::DrawStatusLine(const FString& Text, int32 LineIndex, const FLinearColor& Color)
+void ASurvivalHUD::DrawStatusLine(const FString& Text, int32 LineIndex, const FLinearColor& Color)
 {
 	DrawText(Text, Color, 24.0f, 24.0f + LineHeight * LineIndex, GEngine ? GEngine->GetSmallFont() : nullptr, TextScale);
 }
 
-void ARussellSurvivalHUD::DrawTopRightStatusLine(const FString& Text, int32 LineIndex, const FLinearColor& Color)
+void ASurvivalHUD::DrawTopRightStatusLine(const FString& Text, int32 LineIndex, const FLinearColor& Color)
 {
 	if (!Canvas)
 	{
@@ -93,7 +93,7 @@ void ARussellSurvivalHUD::DrawTopRightStatusLine(const FString& Text, int32 Line
 	DrawText(Text, Color, DrawX, DrawY, Font, TextScale);
 }
 
-void ARussellSurvivalHUD::UpdatePerformanceMetrics(float DeltaSeconds)
+void ASurvivalHUD::UpdatePerformanceMetrics(float DeltaSeconds)
 {
 	if (DeltaSeconds <= KINDA_SMALL_NUMBER)
 	{
@@ -112,3 +112,4 @@ void ARussellSurvivalHUD::UpdatePerformanceMetrics(float DeltaSeconds)
 
 	SmoothedFPS = SmoothedFrameTimeMs > KINDA_SMALL_NUMBER ? 1000.0f / SmoothedFrameTimeMs : 0.0f;
 }
+

@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "RussellZombieCharacter.generated.h"
+#include "ZombieCharacter.generated.h"
 
 class UAnimSequence;
 class UMaterialInterface;
 class UNiagaraSystem;
-class URussellHealthComponent;
+class UCombatHealthComponent;
 class USkeletalMesh;
 
 USTRUCT(BlueprintType)
-struct FRussellZombieAnimationSet
+struct FZombieAnimationSet
 {
 	GENERATED_BODY()
 
@@ -34,7 +34,7 @@ struct FRussellZombieAnimationSet
 };
 
 USTRUCT(BlueprintType)
-struct FRussellZombieVariantDefinition
+struct FZombieVariantDefinition
 {
 	GENERATED_BODY()
 
@@ -51,7 +51,7 @@ struct FRussellZombieVariantDefinition
 	TArray<TSoftObjectPtr<UMaterialInterface>> MaterialOverrides;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variant")
-	FRussellZombieAnimationSet Animations;
+	FZombieAnimationSet Animations;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variant", meta = (ClampMin = "1.0"))
 	float MaxHealth = 80.0f;
@@ -85,12 +85,12 @@ struct FRussellZombieVariantDefinition
 };
 
 UCLASS()
-class ZOMBIESHOOTING_API ARussellZombieCharacter : public ACharacter
+class ZOMBIESHOOTING_API AZombieCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	ARussellZombieCharacter();
+	AZombieCharacter();
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -100,14 +100,14 @@ public:
 	bool IsDead() const { return bIsDead; }
 
 	UFUNCTION(BlueprintCallable, Category = "Zombie")
-	void ApplyVariantDefinition(const FRussellZombieVariantDefinition& VariantDefinition);
+	void ApplyVariantDefinition(const FZombieVariantDefinition& VariantDefinition);
 
 	UFUNCTION(BlueprintPure, Category = "Zombie")
 	FName GetVariantId() const { return CurrentVariantId; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<URussellHealthComponent> HealthComponent;
+	TObjectPtr<UCombatHealthComponent> HealthComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie")
 	float WalkSpeed;
@@ -173,7 +173,7 @@ protected:
 	void HandleHealthDepleted();
 
 	void AcquireTarget();
-	void ChaseTarget(float DeltaSeconds);
+	void ChaseTarget();
 	void AttackTarget();
 	void PlayAnimation(UAnimSequence* Animation, bool bLooping);
 	void ResumeLocomotionAnimation();
@@ -207,3 +207,4 @@ private:
 	bool bIsDead;
 	bool bIsSpawnAnimationActive;
 };
+

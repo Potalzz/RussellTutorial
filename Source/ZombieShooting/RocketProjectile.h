@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "RussellMissileProjectile.generated.h"
+#include "RocketProjectile.generated.h"
 
 class AController;
 class UNiagaraComponent;
@@ -14,12 +14,12 @@ class USphereComponent;
 class UStaticMeshComponent;
 
 UCLASS()
-class ZOMBIESHOOTING_API ARussellMissileProjectile : public AActor
+class ZOMBIESHOOTING_API ARocketProjectile : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	ARussellMissileProjectile();
+	ARocketProjectile();
 
 	void InitializeProjectile(AActor* NewOwner, AController* NewDamageInstigator, float NewDamage, float NewExplosionRadius);
 
@@ -63,3 +63,4 @@ private:
 	void Explode(const FVector& ExplosionLocation);
 	void SpawnExplosionFX(UWorld* World, const FVector& ExplosionLocation) const;
 };
+

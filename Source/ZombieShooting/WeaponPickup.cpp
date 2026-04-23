@@ -1,20 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RussellWeaponPickup.h"
+#include "WeaponPickup.h"
 
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
-#include "RussellFirstPersonCharacter.h"
+#include "ZombiePlayerCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
-ARussellWeaponPickup::ARussellWeaponPickup()
+AWeaponPickup::AWeaponPickup()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	SetCanBeDamaged(false);
 
 	CollisionRadius = 120.0f;
+	PickupWeaponMode = EWeaponMode::RPG7;
 	bConsumed = false;
 
 	RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -39,38 +40,39 @@ ARussellWeaponPickup::ARussellWeaponPickup()
 		PickupFXComponent->SetAsset(PickupFXAsset.Object);
 	}
 
-	PickupCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ARussellWeaponPickup::HandlePickupOverlap);
+	PickupCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AWeaponPickup::HandlePickupOverlap);
 	RefreshPickupCollision();
 }
 
-void ARussellWeaponPickup::OnConstruction(const FTransform& Transform)
+void AWeaponPickup::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 	RefreshPickupCollision();
 }
 
-void ARussellWeaponPickup::HandlePickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AWeaponPickup::HandlePickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (bConsumed)
 	{
 		return;
 	}
 
-	ARussellFirstPersonCharacter* PlayerCharacter = Cast<ARussellFirstPersonCharacter>(OtherActor);
+	AZombiePlayerCharacter* PlayerCharacter = Cast<AZombiePlayerCharacter>(OtherActor);
 	if (!PlayerCharacter || PlayerCharacter->IsDead())
 	{
 		return;
 	}
 
 	bConsumed = true;
-	PlayerCharacter->EquipRPG7();
+	PlayerCharacter->EquipWeapon(PickupWeaponMode);
 	Destroy();
 }
 
-void ARussellWeaponPickup::RefreshPickupCollision()
+void AWeaponPickup::RefreshPickupCollision()
 {
 	if (PickupCollisionComponent)
 	{
 		PickupCollisionComponent->SetSphereRadius(CollisionRadius);
 	}
 }
+

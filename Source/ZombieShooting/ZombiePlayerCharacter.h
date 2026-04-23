@@ -4,23 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "RussellShotgunComponent.h"
-#include "RussellFirstPersonCharacter.generated.h"
+#include "WeaponComponent.h"
+#include "ZombiePlayerCharacter.generated.h"
 
 class UCameraComponent;
-class URussellHealthComponent;
+class UCombatHealthComponent;
 class UMaterialInterface;
 class USceneComponent;
 class UStaticMesh;
 class UStaticMeshComponent;
 
 UCLASS()
-class ZOMBIESHOOTING_API ARussellFirstPersonCharacter : public ACharacter
+class ZOMBIESHOOTING_API AZombiePlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	ARussellFirstPersonCharacter();
+	AZombiePlayerCharacter();
 
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -47,6 +47,9 @@ public:
 	FString GetCurrentWeaponLabel() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void EquipWeapon(EWeaponMode NewWeaponMode);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void EquipRPG7();
 
 	UFUNCTION(BlueprintPure, Category = "Weapon")
@@ -60,10 +63,10 @@ protected:
 	TObjectPtr<UCameraComponent> FirstPersonCameraComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<URussellHealthComponent> HealthComponent;
+	TObjectPtr<UCombatHealthComponent> HealthComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<URussellShotgunComponent> ShotgunComponent;
+	TObjectPtr<UWeaponComponent> ShotgunComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UStaticMeshComponent> ShotgunMeshComponent;
@@ -84,7 +87,7 @@ protected:
 	TObjectPtr<UStaticMesh> RPG7StaticMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
-	ERussellWeaponMode StartingWeaponMode;
+	EWeaponMode StartingWeaponMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UMaterialInterface> HandBaseMaterial;
@@ -105,11 +108,12 @@ protected:
 	void MoveRight(float Value);
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
-	void FireShotgun();
-	void ReloadShotgun();
+	void FireWeapon();
+	void ReloadWeapon();
 	void RestartLevel();
 	void InitializeStartingWeapon();
 	void ApplyFirstPersonHandMaterial();
+	void ApplyCurrentWeaponVisual();
 	void ApplyShotgunVisual();
 	void ApplyRPG7Visual();
 	void ApplyWeaponMaterials(UStaticMesh* WeaponMesh);
@@ -117,3 +121,4 @@ protected:
 private:
 	bool bIsDead;
 };
+

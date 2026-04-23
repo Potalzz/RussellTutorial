@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Chracter_CPlusPlus.generated.h"
+#include "SpawnTestCharacter.generated.h"
 
 UCLASS()
-class ZOMBIESHOOTING_API AChracter_CPlusPlus : public ACharacter
+class ZOMBIESHOOTING_API ASpawnTestCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	AChracter_CPlusPlus();
+	ASpawnTestCharacter();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<AActor> ActorBPToSpawn;
@@ -22,3 +22,4 @@ public:
 	void SpawnActor();
 
 };
+

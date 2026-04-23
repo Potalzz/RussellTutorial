@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RussellShotgunComponent.h"
+#include "WeaponComponent.h"
 
 #include "DrawDebugHelpers.h"
 #include "Engine/DamageEvents.h"
@@ -10,11 +10,11 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
-#include "RussellMissileProjectile.h"
+#include "RocketProjectile.h"
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 
-URussellShotgunComponent::URussellShotgunComponent()
+UWeaponComponent::UWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
@@ -23,7 +23,7 @@ URussellShotgunComponent::URussellShotgunComponent()
 	SpreadDegrees = 4.0f;
 	Range = 6500.0f;
 	FireInterval = 0.75f;
-	WeaponMode = ERussellWeaponMode::Shotgun;
+	WeaponMode = EWeaponMode::Shotgun;
 	MaxAmmo = 8;
 	bInfiniteReserve = true;
 	bInfiniteAmmo = true;
@@ -33,7 +33,7 @@ URussellShotgunComponent::URussellShotgunComponent()
 	PelletTracerColor = FColor(255, 212, 64);
 	MuzzleFlashScale = 1.0f;
 	RPG7FireInterval = 1.0f;
-	MissileProjectileClass = ARussellMissileProjectile::StaticClass();
+	MissileProjectileClass = ARocketProjectile::StaticClass();
 	MissileDamage = 120.0f;
 	MissileExplosionRadius = 350.0f;
 	MissileMuzzleOffset = 36.0f;
@@ -58,24 +58,24 @@ URussellShotgunComponent::URussellShotgunComponent()
 	}
 }
 
-void URussellShotgunComponent::BeginPlay()
+void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	Reload();
 }
 
-bool URussellShotgunComponent::Fire(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation)
+bool UWeaponComponent::Fire(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation)
 {
 	return FireInternal(InstigatorController, TraceStart, AimRotation, TraceStart);
 }
 
-bool URussellShotgunComponent::FireWithVisualStart(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart)
+bool UWeaponComponent::FireWithVisualStart(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart)
 {
 	return FireInternal(InstigatorController, TraceStart, AimRotation, VisualStart);
 }
 
-bool URussellShotgunComponent::FireInternal(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart)
+bool UWeaponComponent::FireInternal(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart)
 {
 	UWorld* World = GetWorld();
 	AActor* Owner = GetOwner();
@@ -85,7 +85,7 @@ bool URussellShotgunComponent::FireInternal(AController* InstigatorController, c
 		return false;
 	}
 
-	if (WeaponMode == ERussellWeaponMode::RPG7)
+	if (WeaponMode == EWeaponMode::RPG7)
 	{
 		if (!FireMissile(InstigatorController, TraceStart, AimRotation, VisualStart))
 		{
@@ -98,7 +98,7 @@ bool URussellShotgunComponent::FireInternal(AController* InstigatorController, c
 
 	SpawnMuzzleFX(World, VisualStart, AimRotation);
 
-	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(RussellShotgunTrace), true, Owner);
+	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(WeaponTrace), true, Owner);
 	QueryParams.AddIgnoredActor(Owner);
 
 	const float HalfAngleRadians = FMath::DegreesToRadians(SpreadDegrees);
@@ -137,7 +137,7 @@ bool URussellShotgunComponent::FireInternal(AController* InstigatorController, c
 	return true;
 }
 
-bool URussellShotgunComponent::FireMissile(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart)
+bool UWeaponComponent::FireMissile(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart)
 {
 	UWorld* World = GetWorld();
 	AActor* Owner = GetOwner();
@@ -160,7 +160,7 @@ bool URussellShotgunComponent::FireMissile(AController* InstigatorController, co
 	SpawnParams.Instigator = Cast<APawn>(Owner);
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	ARussellMissileProjectile* Missile = World->SpawnActor<ARussellMissileProjectile>(MissileProjectileClass, SpawnLocation, MissileRotation, SpawnParams);
+	ARocketProjectile* Missile = World->SpawnActor<ARocketProjectile>(MissileProjectileClass, SpawnLocation, MissileRotation, SpawnParams);
 	if (Missile)
 	{
 		Missile->InitializeProjectile(Owner, InstigatorController, MissileDamage, MissileExplosionRadius);
@@ -169,12 +169,12 @@ bool URussellShotgunComponent::FireMissile(AController* InstigatorController, co
 	return Missile != nullptr;
 }
 
-void URussellShotgunComponent::Reload()
+void UWeaponComponent::Reload()
 {
 	CurrentAmmo = MaxAmmo;
 }
 
-void URussellShotgunComponent::RegisterSuccessfulShot(UWorld* World)
+void UWeaponComponent::RegisterSuccessfulShot(UWorld* World)
 {
 	if (!World)
 	{
@@ -198,7 +198,7 @@ void URussellShotgunComponent::RegisterSuccessfulShot(UWorld* World)
 	}
 }
 
-bool URussellShotgunComponent::CanFire() const
+bool UWeaponComponent::CanFire() const
 {
 	const UWorld* World = GetWorld();
 	if (!World)
@@ -210,31 +210,31 @@ bool URussellShotgunComponent::CanFire() const
 	return bHasAmmo && World->GetTimeSeconds() - LastFireTime >= GetActiveFireInterval();
 }
 
-void URussellShotgunComponent::SetWeaponMode(ERussellWeaponMode NewWeaponMode)
+void UWeaponComponent::SetWeaponMode(EWeaponMode NewWeaponMode)
 {
 	WeaponMode = NewWeaponMode;
 	Reload();
 }
 
-FString URussellShotgunComponent::GetWeaponModeLabel() const
+FString UWeaponComponent::GetWeaponModeLabel() const
 {
 	switch (WeaponMode)
 	{
-	case ERussellWeaponMode::RPG7:
+	case EWeaponMode::RPG7:
 		return TEXT("RPG7");
 
-	case ERussellWeaponMode::Shotgun:
+	case EWeaponMode::Shotgun:
 	default:
 		return TEXT("Shotgun");
 	}
 }
 
-void URussellShotgunComponent::SpawnMuzzleFX(UWorld* World, const FVector& VisualStart, const FRotator& AimRotation) const
+void UWeaponComponent::SpawnMuzzleFX(UWorld* World, const FVector& VisualStart, const FRotator& AimRotation) const
 {
 	SpawnNiagaraFX(World, MuzzleFlashSystem, VisualStart, AimRotation, MuzzleFlashScale);
 }
 
-UNiagaraComponent* URussellShotgunComponent::SpawnNiagaraFX(UWorld* World, UNiagaraSystem* NiagaraSystem, const FVector& Location, const FRotator& Rotation, float Scale, float AutoDeactivateDelay) const
+UNiagaraComponent* UWeaponComponent::SpawnNiagaraFX(UWorld* World, UNiagaraSystem* NiagaraSystem, const FVector& Location, const FRotator& Rotation, float Scale, float AutoDeactivateDelay) const
 {
 	if (World && NiagaraSystem)
 	{
@@ -263,7 +263,8 @@ UNiagaraComponent* URussellShotgunComponent::SpawnNiagaraFX(UWorld* World, UNiag
 	return nullptr;
 }
 
-float URussellShotgunComponent::GetActiveFireInterval() const
+float UWeaponComponent::GetActiveFireInterval() const
 {
-	return WeaponMode == ERussellWeaponMode::RPG7 ? RPG7FireInterval : FireInterval;
+	return WeaponMode == EWeaponMode::RPG7 ? RPG7FireInterval : FireInterval;
 }
+

@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RussellFirstPersonCharacter.h"
+#include "ZombiePlayerCharacter.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,14 +10,15 @@
 #include "Engine/DamageEvents.h"
 #include "Engine/StaticMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
-#include "RussellHealthComponent.h"
-#include "RussellShotgunComponent.h"
+#include "CombatHealthComponent.h"
+#include "WeaponComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
-ARussellFirstPersonCharacter::ARussellFirstPersonCharacter()
+AZombiePlayerCharacter::AZombiePlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -28,7 +29,7 @@ ARussellFirstPersonCharacter::ARussellFirstPersonCharacter()
 	BaseEyeHeight = 64.0f;
 	bIsDead = false;
 	HandTint = FLinearColor(0.78f, 0.54f, 0.38f, 1.0f);
-	StartingWeaponMode = ERussellWeaponMode::Shotgun;
+	StartingWeaponMode = EWeaponMode::Shotgun;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -44,10 +45,10 @@ ARussellFirstPersonCharacter::ARussellFirstPersonCharacter()
 	FirstPersonCameraComponent->SetRelativeLocation(FVector(-10.0f, 0.0f, BaseEyeHeight));
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
-	HealthComponent = CreateDefaultSubobject<URussellHealthComponent>(TEXT("HealthComponent"));
+	HealthComponent = CreateDefaultSubobject<UCombatHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->MaxHealth = 100.0f;
 
-	ShotgunComponent = CreateDefaultSubobject<URussellShotgunComponent>(TEXT("ShotgunComponent"));
+	ShotgunComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("ShotgunComponent"));
 
 	ShotgunMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShotgunMesh"));
 	ShotgunMeshComponent->SetupAttachment(FirstPersonCameraComponent);
@@ -128,20 +129,20 @@ ARussellFirstPersonCharacter::ARussellFirstPersonCharacter()
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
-void ARussellFirstPersonCharacter::BeginPlay()
+void AZombiePlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 	if (HealthComponent)
 	{
-		HealthComponent->OnHealthDepleted.AddDynamic(this, &ARussellFirstPersonCharacter::HandleHealthDepleted);
+		HealthComponent->OnHealthDepleted.AddDynamic(this, &AZombiePlayerCharacter::HandleHealthDepleted);
 	}
 
 	InitializeStartingWeapon();
 	ApplyFirstPersonHandMaterial();
 }
 
-void ARussellFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AZombiePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -149,71 +150,78 @@ void ARussellFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ARussellFirstPersonCharacter::FireShotgun);
-	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ARussellFirstPersonCharacter::ReloadShotgun);
-	PlayerInputComponent->BindAction("Restart", IE_Pressed, this, &ARussellFirstPersonCharacter::RestartLevel);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AZombiePlayerCharacter::FireWeapon);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AZombiePlayerCharacter::ReloadWeapon);
+	PlayerInputComponent->BindAction("Restart", IE_Pressed, this, &AZombiePlayerCharacter::RestartLevel);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &ARussellFirstPersonCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ARussellFirstPersonCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveForward", this, &AZombiePlayerCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AZombiePlayerCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &ARussellFirstPersonCharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &ARussellFirstPersonCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("TurnRate", this, &AZombiePlayerCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("LookUpRate", this, &AZombiePlayerCharacter::LookUpAtRate);
 }
 
-float ARussellFirstPersonCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+float AZombiePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	const float AppliedDamage = HealthComponent ? HealthComponent->ApplyDamage(DamageAmount) : 0.0f;
+	const float DamageToApply = ActualDamage > 0.0f ? ActualDamage : DamageAmount;
+	const float AppliedDamage = HealthComponent ? HealthComponent->ApplyDamage(DamageToApply) : 0.0f;
 	return AppliedDamage > 0.0f ? AppliedDamage : ActualDamage;
 }
 
-float ARussellFirstPersonCharacter::GetCurrentHealth() const
+float AZombiePlayerCharacter::GetCurrentHealth() const
 {
 	return HealthComponent ? HealthComponent->CurrentHealth : 0.0f;
 }
 
-float ARussellFirstPersonCharacter::GetMaxHealth() const
+float AZombiePlayerCharacter::GetMaxHealth() const
 {
 	return HealthComponent ? HealthComponent->MaxHealth : 0.0f;
 }
 
-int32 ARussellFirstPersonCharacter::GetCurrentAmmo() const
+int32 AZombiePlayerCharacter::GetCurrentAmmo() const
 {
 	return ShotgunComponent ? ShotgunComponent->GetCurrentAmmo() : 0;
 }
 
-int32 ARussellFirstPersonCharacter::GetMaxAmmo() const
+int32 AZombiePlayerCharacter::GetMaxAmmo() const
 {
 	return ShotgunComponent ? ShotgunComponent->GetMaxAmmo() : 0;
 }
 
-bool ARussellFirstPersonCharacter::HasInfiniteAmmo() const
+bool AZombiePlayerCharacter::HasInfiniteAmmo() const
 {
 	return ShotgunComponent ? ShotgunComponent->HasInfiniteAmmo() : false;
 }
 
-FString ARussellFirstPersonCharacter::GetCurrentWeaponLabel() const
+FString AZombiePlayerCharacter::GetCurrentWeaponLabel() const
 {
 	return ShotgunComponent ? ShotgunComponent->GetWeaponModeLabel() : TEXT("Unarmed");
 }
 
-void ARussellFirstPersonCharacter::EquipRPG7()
+void AZombiePlayerCharacter::EquipWeapon(EWeaponMode NewWeaponMode)
 {
-	if (ShotgunComponent)
+	if (!ShotgunComponent)
 	{
-		ShotgunComponent->SetWeaponMode(ERussellWeaponMode::RPG7);
+		return;
 	}
 
-	ApplyRPG7Visual();
+	ShotgunComponent->SetWeaponMode(NewWeaponMode);
+	ApplyCurrentWeaponVisual();
 }
 
-bool ARussellFirstPersonCharacter::IsUsingRPG7() const
+void AZombiePlayerCharacter::EquipRPG7()
+{
+	EquipWeapon(EWeaponMode::RPG7);
+}
+
+bool AZombiePlayerCharacter::IsUsingRPG7() const
 {
 	return ShotgunComponent ? ShotgunComponent->IsUsingRPG7() : false;
 }
 
-void ARussellFirstPersonCharacter::MoveForward(float Value)
+void AZombiePlayerCharacter::MoveForward(float Value)
 {
 	if (bIsDead)
 	{
@@ -229,7 +237,7 @@ void ARussellFirstPersonCharacter::MoveForward(float Value)
 	}
 }
 
-void ARussellFirstPersonCharacter::MoveRight(float Value)
+void AZombiePlayerCharacter::MoveRight(float Value)
 {
 	if (bIsDead)
 	{
@@ -245,7 +253,7 @@ void ARussellFirstPersonCharacter::MoveRight(float Value)
 	}
 }
 
-void ARussellFirstPersonCharacter::TurnAtRate(float Rate)
+void AZombiePlayerCharacter::TurnAtRate(float Rate)
 {
 	if (bIsDead)
 	{
@@ -255,7 +263,7 @@ void ARussellFirstPersonCharacter::TurnAtRate(float Rate)
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
-void ARussellFirstPersonCharacter::LookUpAtRate(float Rate)
+void AZombiePlayerCharacter::LookUpAtRate(float Rate)
 {
 	if (bIsDead)
 	{
@@ -265,7 +273,7 @@ void ARussellFirstPersonCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void ARussellFirstPersonCharacter::FireShotgun()
+void AZombiePlayerCharacter::FireWeapon()
 {
 	if (bIsDead || !ShotgunComponent || !FirstPersonCameraComponent)
 	{
@@ -276,7 +284,7 @@ void ARussellFirstPersonCharacter::FireShotgun()
 	ShotgunComponent->FireWithVisualStart(GetController(), FirstPersonCameraComponent->GetComponentLocation(), FirstPersonCameraComponent->GetComponentRotation(), MuzzleLocation);
 }
 
-void ARussellFirstPersonCharacter::ReloadShotgun()
+void AZombiePlayerCharacter::ReloadWeapon()
 {
 	if (ShotgunComponent)
 	{
@@ -284,7 +292,7 @@ void ARussellFirstPersonCharacter::ReloadShotgun()
 	}
 }
 
-void ARussellFirstPersonCharacter::RestartLevel()
+void AZombiePlayerCharacter::RestartLevel()
 {
 	const FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this, true);
 	if (!CurrentLevelName.IsEmpty())
@@ -293,25 +301,12 @@ void ARussellFirstPersonCharacter::RestartLevel()
 	}
 }
 
-void ARussellFirstPersonCharacter::InitializeStartingWeapon()
+void AZombiePlayerCharacter::InitializeStartingWeapon()
 {
-	if (!ShotgunComponent)
-	{
-		return;
-	}
-
-	ShotgunComponent->SetWeaponMode(StartingWeaponMode);
-
-	if (StartingWeaponMode == ERussellWeaponMode::RPG7)
-	{
-		ApplyRPG7Visual();
-		return;
-	}
-
-	ApplyShotgunVisual();
+	EquipWeapon(StartingWeaponMode);
 }
 
-void ARussellFirstPersonCharacter::HandleHealthDepleted()
+void AZombiePlayerCharacter::HandleHealthDepleted()
 {
 	if (bIsDead)
 	{
@@ -321,9 +316,14 @@ void ARussellFirstPersonCharacter::HandleHealthDepleted()
 	bIsDead = true;
 	GetCharacterMovement()->DisableMovement();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		DisableInput(PlayerController);
+	}
 }
 
-void ARussellFirstPersonCharacter::ApplyFirstPersonHandMaterial()
+void AZombiePlayerCharacter::ApplyFirstPersonHandMaterial()
 {
 	if (!HandBaseMaterial)
 	{
@@ -348,7 +348,18 @@ void ARussellFirstPersonCharacter::ApplyFirstPersonHandMaterial()
 	}
 }
 
-void ARussellFirstPersonCharacter::ApplyShotgunVisual()
+void AZombiePlayerCharacter::ApplyCurrentWeaponVisual()
+{
+	if (ShotgunComponent && ShotgunComponent->GetWeaponMode() == EWeaponMode::RPG7)
+	{
+		ApplyRPG7Visual();
+		return;
+	}
+
+	ApplyShotgunVisual();
+}
+
+void AZombiePlayerCharacter::ApplyShotgunVisual()
 {
 	if (ShotgunMeshComponent)
 	{
@@ -367,9 +378,21 @@ void ARussellFirstPersonCharacter::ApplyShotgunVisual()
 	{
 		ShotgunMuzzleComponent->SetRelativeLocation(FVector(508.0f, 0.0f, -6.0f));
 	}
+
+	if (RightForearmMeshComponent)
+	{
+		RightForearmMeshComponent->SetRelativeLocation(FVector(36.0f, 31.0f, -44.0f));
+		RightForearmMeshComponent->SetRelativeRotation(FRotator(90.0f, -8.0f, 0.0f));
+	}
+
+	if (RightHandMeshComponent)
+	{
+		RightHandMeshComponent->SetRelativeLocation(FVector(58.0f, 24.0f, -31.0f));
+		RightHandMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, -12.0f));
+	}
 }
 
-void ARussellFirstPersonCharacter::ApplyRPG7Visual()
+void AZombiePlayerCharacter::ApplyRPG7Visual()
 {
 	if (ShotgunMeshComponent)
 	{
@@ -415,7 +438,7 @@ void ARussellFirstPersonCharacter::ApplyRPG7Visual()
 	}
 }
 
-void ARussellFirstPersonCharacter::ApplyWeaponMaterials(UStaticMesh* WeaponMesh)
+void AZombiePlayerCharacter::ApplyWeaponMaterials(UStaticMesh* WeaponMesh)
 {
 	if (!ShotgunMeshComponent || !WeaponMesh)
 	{
@@ -430,3 +453,4 @@ void ARussellFirstPersonCharacter::ApplyWeaponMaterials(UStaticMesh* WeaponMesh)
 		ShotgunMeshComponent->SetMaterial(MaterialIndex, MaterialToApply);
 	}
 }
+

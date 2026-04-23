@@ -8,10 +8,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
 #include "NavigationSystem.h"
-#include "RussellFirstPersonCharacter.h"
-#include "RussellSurvivalHUD.h"
-#include "RussellWeaponPickup.h"
-#include "RussellZombieCharacter.h"
+#include "ZombiePlayerCharacter.h"
+#include "SurvivalHUD.h"
+#include "WeaponPickup.h"
+#include "ZombieCharacter.h"
 #include "Scalability.h"
 
 namespace
@@ -43,21 +43,29 @@ namespace
 		}
 		return Result;
 	}
+
+	void WarmUpAnimationAssets(const TArray<TSoftObjectPtr<UAnimSequence>>& Animations)
+	{
+		for (const TSoftObjectPtr<UAnimSequence>& Animation : Animations)
+		{
+			Animation.LoadSynchronous();
+		}
+	}
 }
 
 AZombieShootingGameMode::AZombieShootingGameMode()
 {
-	DefaultPawnClass = ARussellFirstPersonCharacter::StaticClass();
-	HUDClass = ARussellSurvivalHUD::StaticClass();
+	DefaultPawnClass = AZombiePlayerCharacter::StaticClass();
+	HUDClass = ASurvivalHUD::StaticClass();
 
-	ZombieClass = ARussellZombieCharacter::StaticClass();
+	ZombieClass = AZombieCharacter::StaticClass();
 	InitialZombiesPerWave = 4;
 	AdditionalZombiesPerWave = 2;
 	SpawnInterval = 1.25f;
 	MinSpawnRadius = 1200.0f;
 	MaxSpawnRadius = 2200.0f;
 	NextWaveDelay = 4.0f;
-	WeaponPickupClass = ARussellWeaponPickup::StaticClass();
+	WeaponPickupClass = AWeaponPickup::StaticClass();
 	WeaponPickupSpawnDelay = 15.0f;
 	WeaponPickupSpawnRadius = 1800.0f;
 	bApplyPerformanceProfile = true;
@@ -102,7 +110,7 @@ void AZombieShootingGameMode::BeginPlay()
 	}
 }
 
-void AZombieShootingGameMode::NotifyZombieKilled(ARussellZombieCharacter* Zombie)
+void AZombieShootingGameMode::NotifyZombieKilled()
 {
 	KillCount++;
 	AliveZombies = FMath::Max(0, AliveZombies - 1);
@@ -146,14 +154,14 @@ void AZombieShootingGameMode::SpawnZombie()
 	const FRotator SpawnRotation(0.0f, FMath::FRandRange(0.0f, 360.0f), 0.0f);
 	const FTransform SpawnTransform(SpawnRotation, SpawnLocation);
 
-	if (ARussellZombieCharacter* SpawnedZombie = World->SpawnActorDeferred<ARussellZombieCharacter>(
+	if (AZombieCharacter* SpawnedZombie = World->SpawnActorDeferred<AZombieCharacter>(
 		ZombieClass,
 		SpawnTransform,
 		nullptr,
 		nullptr,
 		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn))
 	{
-		if (const FRussellZombieVariantDefinition* VariantDefinition = ChooseZombieVariant())
+		if (const FZombieVariantDefinition* VariantDefinition = ChooseZombieVariant())
 		{
 			SpawnedZombie->ApplyVariantDefinition(*VariantDefinition);
 		}
@@ -183,7 +191,7 @@ void AZombieShootingGameMode::SpawnWeaponPickup()
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	World->SpawnActor<ARussellWeaponPickup>(WeaponPickupClass, SpawnLocation, SpawnRotation, SpawnParams);
+	World->SpawnActor<AWeaponPickup>(WeaponPickupClass, SpawnLocation, SpawnRotation, SpawnParams);
 }
 
 FVector AZombieShootingGameMode::FindSpawnLocation() const
@@ -220,7 +228,7 @@ FVector AZombieShootingGameMode::FindSpawnLocation() const
 		const FVector TraceStart = Candidate + FVector(0.0f, 0.0f, 1200.0f);
 		const FVector TraceEnd = Candidate - FVector(0.0f, 0.0f, 2500.0f);
 
-		FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(RussellSpawnTrace), false);
+		FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(ZombieSpawnTrace), false);
 		if (World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_WorldStatic, QueryParams))
 		{
 			Candidate = HitResult.Location + FVector(0.0f, 0.0f, 96.0f);
@@ -262,7 +270,7 @@ FVector AZombieShootingGameMode::FindWeaponPickupLocation() const
 	const FVector TraceStart = Candidate + FVector(0.0f, 0.0f, 1200.0f);
 	const FVector TraceEnd = Candidate - FVector(0.0f, 0.0f, 2500.0f);
 
-	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(RussellPickupSpawnTrace), false);
+	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(WeaponPickupSpawnTrace), false);
 	if (World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_WorldStatic, QueryParams))
 	{
 		return HitResult.Location + FVector(0.0f, 0.0f, 18.0f);
@@ -271,7 +279,7 @@ FVector AZombieShootingGameMode::FindWeaponPickupLocation() const
 	return Candidate + FVector(0.0f, 0.0f, 18.0f);
 }
 
-const FRussellZombieVariantDefinition* AZombieShootingGameMode::ChooseZombieVariant() const
+const FZombieVariantDefinition* AZombieShootingGameMode::ChooseZombieVariant() const
 {
 	if (ZombieVariants.IsEmpty())
 	{
@@ -279,7 +287,7 @@ const FRussellZombieVariantDefinition* AZombieShootingGameMode::ChooseZombieVari
 	}
 
 	int32 TotalWeight = 0;
-	for (const FRussellZombieVariantDefinition& VariantDefinition : ZombieVariants)
+	for (const FZombieVariantDefinition& VariantDefinition : ZombieVariants)
 	{
 		TotalWeight += FMath::Max(1, VariantDefinition.SpawnWeight);
 	}
@@ -290,7 +298,7 @@ const FRussellZombieVariantDefinition* AZombieShootingGameMode::ChooseZombieVari
 	}
 
 	int32 Pick = FMath::RandRange(0, TotalWeight - 1);
-	for (const FRussellZombieVariantDefinition& VariantDefinition : ZombieVariants)
+	for (const FZombieVariantDefinition& VariantDefinition : ZombieVariants)
 	{
 		Pick -= FMath::Max(1, VariantDefinition.SpawnWeight);
 		if (Pick < 0)
@@ -359,7 +367,7 @@ void AZombieShootingGameMode::ApplyPerformanceProfile()
 
 void AZombieShootingGameMode::WarmUpZombieVariantAssets()
 {
-	for (const FRussellZombieVariantDefinition& VariantDefinition : ZombieVariants)
+	for (const FZombieVariantDefinition& VariantDefinition : ZombieVariants)
 	{
 		VariantDefinition.SkeletalMesh.LoadSynchronous();
 
@@ -368,21 +376,11 @@ void AZombieShootingGameMode::WarmUpZombieVariantAssets()
 			MaterialOverride.LoadSynchronous();
 		}
 
-		const TArray<TArray<TSoftObjectPtr<UAnimSequence>>> AnimationGroups = {
-			VariantDefinition.Animations.LocomotionAnimations,
-			VariantDefinition.Animations.AttackAnimations,
-			VariantDefinition.Animations.HitAnimations,
-			VariantDefinition.Animations.DeathAnimations,
-			VariantDefinition.Animations.SpawnAnimations
-		};
-
-		for (const TArray<TSoftObjectPtr<UAnimSequence>>& AnimationGroup : AnimationGroups)
-		{
-			for (const TSoftObjectPtr<UAnimSequence>& Animation : AnimationGroup)
-			{
-				Animation.LoadSynchronous();
-			}
-		}
+		WarmUpAnimationAssets(VariantDefinition.Animations.LocomotionAnimations);
+		WarmUpAnimationAssets(VariantDefinition.Animations.AttackAnimations);
+		WarmUpAnimationAssets(VariantDefinition.Animations.HitAnimations);
+		WarmUpAnimationAssets(VariantDefinition.Animations.DeathAnimations);
+		WarmUpAnimationAssets(VariantDefinition.Animations.SpawnAnimations);
 	}
 }
 
@@ -393,7 +391,7 @@ void AZombieShootingGameMode::BuildDefaultZombieVariants()
 		return;
 	}
 
-	FRussellZombieVariantDefinition WalkerZombie;
+	FZombieVariantDefinition WalkerZombie;
 	WalkerZombie.VariantId = TEXT("walker_zombie");
 	WalkerZombie.SpawnWeight = 4;
 	WalkerZombie.SkeletalMesh = MakeSoftAsset<USkeletalMesh>(TEXT("/Game/UndeadPack/Zombie/Mesh/SK_Zombie.SK_Zombie"));
@@ -421,7 +419,7 @@ void AZombieShootingGameMode::BuildDefaultZombieVariants()
 	WalkerZombie.MeshRelativeRotation = FRotator(0.0f, -90.0f, 0.0f);
 	ZombieVariants.Add(WalkerZombie);
 
-	FRussellZombieVariantDefinition RotterZombie = WalkerZombie;
+	FZombieVariantDefinition RotterZombie = WalkerZombie;
 	RotterZombie.VariantId = TEXT("rotter_zombie");
 	RotterZombie.SpawnWeight = 3;
 	RotterZombie.MaterialOverrides = MakeMaterialArray({
@@ -432,7 +430,7 @@ void AZombieShootingGameMode::BuildDefaultZombieVariants()
 	RotterZombie.MaxHealth = 72.0f;
 	ZombieVariants.Add(RotterZombie);
 
-	FRussellZombieVariantDefinition FeralGhoul;
+	FZombieVariantDefinition FeralGhoul;
 	FeralGhoul.VariantId = TEXT("feral_ghoul");
 	FeralGhoul.SpawnWeight = 3;
 	FeralGhoul.SkeletalMesh = MakeSoftAsset<USkeletalMesh>(TEXT("/Game/UndeadPack/Ghoul/Mesh/SK_Ghoul.SK_Ghoul"));
@@ -463,7 +461,7 @@ void AZombieShootingGameMode::BuildDefaultZombieVariants()
 	FeralGhoul.MeshRelativeRotation = FRotator(0.0f, -90.0f, 0.0f);
 	ZombieVariants.Add(FeralGhoul);
 
-	FRussellZombieVariantDefinition BoneStalker;
+	FZombieVariantDefinition BoneStalker;
 	BoneStalker.VariantId = TEXT("bone_stalker");
 	BoneStalker.SpawnWeight = 2;
 	BoneStalker.SkeletalMesh = MakeSoftAsset<USkeletalMesh>(TEXT("/Game/UndeadPack/SkeletonEnemy/Mesh/SK_Skeleton.SK_Skeleton"));
@@ -496,7 +494,7 @@ void AZombieShootingGameMode::BuildDefaultZombieVariants()
 	BoneStalker.MeshRelativeRotation = FRotator(0.0f, 270.0f, 0.0f);
 	ZombieVariants.Add(BoneStalker);
 
-	FRussellZombieVariantDefinition RoaringLich;
+	FZombieVariantDefinition RoaringLich;
 	RoaringLich.VariantId = TEXT("roaring_lich");
 	RoaringLich.SpawnWeight = 2;
 	RoaringLich.SkeletalMesh = MakeSoftAsset<USkeletalMesh>(TEXT("/Game/UndeadPack/Lich/Mesh/SK_Lich_Full.SK_Lich_Full"));
@@ -532,7 +530,7 @@ void AZombieShootingGameMode::BuildDefaultZombieVariants()
 	RoaringLich.MeshRelativeRotation = FRotator(0.0f, -90.0f, 0.0f);
 	ZombieVariants.Add(RoaringLich);
 
-	FRussellZombieVariantDefinition CrawlLich = RoaringLich;
+	FZombieVariantDefinition CrawlLich = RoaringLich;
 	CrawlLich.VariantId = TEXT("crawl_lich");
 	CrawlLich.SpawnWeight = 1;
 	CrawlLich.MaterialOverrides = MakeMaterialArray({
@@ -556,7 +554,7 @@ void AZombieShootingGameMode::BuildDefaultZombieVariants()
 	CrawlLich.CapsuleHalfHeight = 72.0f;
 	ZombieVariants.Add(CrawlLich);
 
-	FRussellZombieVariantDefinition HopLeftLich = RoaringLich;
+	FZombieVariantDefinition HopLeftLich = RoaringLich;
 	HopLeftLich.VariantId = TEXT("hop_left_lich");
 	HopLeftLich.SpawnWeight = 1;
 	HopLeftLich.MaterialOverrides = MakeMaterialArray({
@@ -573,7 +571,7 @@ void AZombieShootingGameMode::BuildDefaultZombieVariants()
 	HopLeftLich.AttackInterval = 1.1f;
 	ZombieVariants.Add(HopLeftLich);
 
-	FRussellZombieVariantDefinition HopRightLich = HopLeftLich;
+	FZombieVariantDefinition HopRightLich = HopLeftLich;
 	HopRightLich.VariantId = TEXT("hop_right_lich");
 	HopRightLich.Animations.LocomotionAnimations = MakeAnimArray({
 		TEXT("/Game/ZombieShooting/Animations/LichZombieMotion/RT_Lich_ZombieHopRightSlow.RT_Lich_ZombieHopRightSlow"),
@@ -581,3 +579,4 @@ void AZombieShootingGameMode::BuildDefaultZombieVariants()
 	});
 	ZombieVariants.Add(HopRightLich);
 }
+
