@@ -43,6 +43,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Player")
 	bool HasInfiniteAmmo() const;
 
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	FString GetCurrentWeaponLabel() const;
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void EquipRPG7();
 

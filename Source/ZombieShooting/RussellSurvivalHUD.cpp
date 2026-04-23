@@ -31,6 +31,7 @@ void ARussellSurvivalHUD::DrawHUD()
 			? TEXT("Ammo: Infinite")
 			: FString::Printf(TEXT("Ammo: %d / %d"), PlayerCharacter->GetCurrentAmmo(), PlayerCharacter->GetMaxAmmo());
 		DrawStatusLine(AmmoText, 1, TextColor);
+		DrawStatusLine(FString::Printf(TEXT("Weapon: %s"), *PlayerCharacter->GetCurrentWeaponLabel()), 2, TextColor);
 
 		if (PlayerCharacter->IsDead())
 		{
@@ -43,9 +44,9 @@ void ARussellSurvivalHUD::DrawHUD()
 
 	if (GameMode)
 	{
-		DrawStatusLine(FString::Printf(TEXT("Wave: %d"), GameMode->GetWaveNumber()), 2, TextColor);
-		DrawStatusLine(FString::Printf(TEXT("Kills: %d"), GameMode->GetKillCount()), 3, TextColor);
-		DrawStatusLine(FString::Printf(TEXT("Alive: %d"), GameMode->GetAliveZombieCount()), 4, TextColor);
+		DrawStatusLine(FString::Printf(TEXT("Wave: %d"), GameMode->GetWaveNumber()), 3, TextColor);
+		DrawStatusLine(FString::Printf(TEXT("Kills: %d"), GameMode->GetKillCount()), 4, TextColor);
+		DrawStatusLine(FString::Printf(TEXT("Alive: %d"), GameMode->GetAliveZombieCount()), 5, TextColor);
 	}
 }
 

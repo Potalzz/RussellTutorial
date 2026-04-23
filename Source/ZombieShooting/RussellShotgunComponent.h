@@ -132,6 +132,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	bool IsUsingRPG7() const { return WeaponMode == ERussellWeaponMode::RPG7; }
 
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	FString GetWeaponModeLabel() const;
+
 private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Shotgun")
 	int32 CurrentAmmo;

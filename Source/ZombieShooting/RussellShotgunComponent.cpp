@@ -201,6 +201,19 @@ void URussellShotgunComponent::SetWeaponMode(ERussellWeaponMode NewWeaponMode)
 	Reload();
 }
 
+FString URussellShotgunComponent::GetWeaponModeLabel() const
+{
+	switch (WeaponMode)
+	{
+	case ERussellWeaponMode::RPG7:
+		return TEXT("RPG7");
+
+	case ERussellWeaponMode::Shotgun:
+	default:
+		return TEXT("Shotgun");
+	}
+}
+
 void URussellShotgunComponent::SpawnMuzzleFX(UWorld* World, const FVector& VisualStart, const FRotator& AimRotation) const
 {
 	SpawnNiagaraFX(World, MuzzleFlashSystem, VisualStart, AimRotation, MuzzleFlashScale);

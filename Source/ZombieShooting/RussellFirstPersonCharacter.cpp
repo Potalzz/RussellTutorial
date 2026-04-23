@@ -191,6 +191,11 @@ bool ARussellFirstPersonCharacter::HasInfiniteAmmo() const
 	return ShotgunComponent ? ShotgunComponent->HasInfiniteAmmo() : false;
 }
 
+FString ARussellFirstPersonCharacter::GetCurrentWeaponLabel() const
+{
+	return ShotgunComponent ? ShotgunComponent->GetWeaponModeLabel() : TEXT("Unarmed");
+}
+
 void ARussellFirstPersonCharacter::EquipRPG7()
 {
 	if (ShotgunComponent)
