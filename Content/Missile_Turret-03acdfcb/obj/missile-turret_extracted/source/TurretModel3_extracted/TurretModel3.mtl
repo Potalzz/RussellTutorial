@@ -1,0 +1,370 @@
+# Blender MTL File: 'TurretModel3.blend'
+# Material Count: 32
+
+newmtl AroundMissile
+Ns 17.970233
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Attention
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Desktop\\Blender\\Turret\\Attention.jpg
+
+newmtl BackFilter
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Desktop\\Blender\\Turret\\BackFilter_Normal.jpg
+map_Kd D:\\Desktop\\Blender\\Turret\\BackFilter_BaseColor.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\BackFilter_Roughness.jpg
+
+newmtl BackPanel
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Desktop\\Blender\\Turret\\BackPanel.jpg
+
+newmtl Bars
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Desktop\\Blender\\Turret\\Bars_Normal.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\Bars_Roughness.jpg
+
+newmtl BlackMetal
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.017523 0.118728 0.800000
+Ks 0.463636 0.463636 0.463636
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Desktop\\Blender\\Turret\\BlackMetal_Normal.png
+map_Ns D:\\Desktop\\Blender\\Turret\\BlackMetal_Roughness.png
+
+newmtl BlueWire
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.001718 0.015580 0.132864
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl BottomBars
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.217729 0.123509
+Ks 0.080000 0.080000 0.080000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Desktop\\Blender\\Turret\\BottomBars_BaseColor.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\BottomBars_Roughness.jpg
+
+newmtl Electronic
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Desktop\\Blender\\Turret\\Electronic_Normal.jpg
+map_Kd D:\\Desktop\\Blender\\Turret\\Electronic_BaseColor.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\Electronic_Roughness.jpg
+
+newmtl FrontBars
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Desktop\\Blender\\Turret\\FrontBars_Normal.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\FrontBars_Roughness.jpg
+
+newmtl GreayMetal
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.217729 0.123509
+Ks 0.080000 0.080000 0.080000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 2.000000 D:\\Desktop\\Blender\\Turret\\GreyMetal_Normal.png
+map_Ns D:\\Desktop\\Blender\\Turret\\GreyMetal_Roughness.png
+
+newmtl GreenWire
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.007422 0.128239 0.009329
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Hazard
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Desktop\\Blender\\Turret\\Hazard_Paint.jpg
+
+newmtl Iron
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 7.600000 D:\\Desktop\\Blender\\Turret\\TexturesCom_Metal_Medieval_1K_normal.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\TexturesCom_Metal_Medieval_1K_roughness.jpg
+
+newmtl LauncherBars
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 1.110000 D:\\Desktop\\Blender\\Turret\\LauncherBars_Normal.jpg
+map_Kd D:\\Desktop\\Blender\\Turret\\LauncherBars_Basecolor.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\LauncherBars_Roughness.jpg
+
+newmtl Lens
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Desktop\\Blender\\Turret\\Lens1.png
+
+newmtl Lens2
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Desktop\\Blender\\Turret\\Lens2.png
+
+newmtl Lens3
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Desktop\\Blender\\Turret\\Lens3.jpg
+
+newmtl LensAround
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl MetalPlate
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Desktop\\Blender\\Turret\\GreyMetalPlate_Normal.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\GreyMetalPlate_Rougness.jpg
+
+newmtl Number
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Desktop\\Blender\\Turret\\Number.jpg
+
+newmtl OrangeMetalPlate
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Desktop\\Blender\\Turret\\OrangeMetalPlate_Normal.jpg
+map_Kd D:\\Desktop\\Blender\\Turret\\OrangeMetalPlate_BaseColor.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\OrangeMetalPlate_Rougness.jpg
+
+newmtl Pipe
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 10.000000 D:\\Desktop\\Blender\\Turret\\Pipe_Normal.jpg
+map_Kd D:\\Desktop\\Blender\\Turret\\Pipe_BaseColor.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\Pipe_Roughness.jpg
+
+newmtl RedWire
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.128239 0.008623 0.004402
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Rhomboid
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Desktop\\Blender\\Turret\\Rhomboid_Normal.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\Rhomboid_Roughness.jpg
+
+newmtl RustedMetal
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.370000 D:\\Desktop\\Blender\\Turret\\RustedMetal_Normal.png
+map_Ns D:\\Desktop\\Blender\\Turret\\RustedMetal_Roughness.png
+
+newmtl SolarPanel
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.217729 0.123509
+Ks 0.080000 0.080000 0.080000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 2.000000 D:\\Desktop\\Blender\\Turret\\SolarPanel_Normal.jpg
+map_Kd D:\\Desktop\\Blender\\Turret\\SolarPanel_BaseColor.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\SolarPanel_Roughness.jpg
+
+newmtl Vent
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Desktop\\Blender\\Turret\\vent.jpg
+
+newmtl Wire
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Desktop\\Blender\\Turret\\Wire_Normal.jpg
+map_Kd D:\\Desktop\\Blender\\Turret\\Wire_BaseColor.jpg
+map_Ns D:\\Desktop\\Blender\\Turret\\Wire_Roughness.jpg
+
+newmtl controlPanel
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:\\Desktop\\Blender\\Turret\\controlPanel.jpg
+
+newmtl glass
+Ns 900.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl red
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.004393 0.019023
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2

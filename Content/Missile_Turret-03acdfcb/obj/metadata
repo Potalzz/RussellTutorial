@@ -1,0 +1,107 @@
+{
+	"assetNamespace": "fab",
+	"listing":
+	{
+		"averageRating": 5,
+		"createdAt": "",
+		"description": "<p>Missule turret I made just for fun.</p>",
+		"isAiForbidden": false,
+		"isAiGenerated": false,
+		"lastUpdatedAt": "",
+		"listingType": "3d-model",
+		"media": "https://media.fab.com/image_previews/gallery_images/39694ede-67bc-4813-a641-582a891378b1/d0d1b3c7-ee47-4f71-84f4-9b09c9c6ecb4.jpeg",
+		"publishedAt": "2024-10-04T14:57:17.327930Z",
+		"reviewCount": 1,
+		"thumbnail": "https://media.fab.com/image_previews/gallery_images/a179f4e8-be0c-4e9e-9518-bb83503cf64a/f87fce87-9a14-4d70-9a05-c749be9d609d.jpeg",
+		"title": "Missile Turret",
+		"uid": "03acdfcb-0967-4ea8-bf3b-51e30913e0ae",
+		"updatedAt": "",
+		"user":
+		{
+			"coverImageUrl": "",
+			"profileImageUrl": "",
+			"sellerName": "Hellz",
+			"uid": "ab64a5a8-e61c-49eb-8c44-c7b4b36f5b44"
+		},
+		"tags": [
+			{
+				"name": "Fanart",
+				"slug": "fanart",
+				"uid": "0c37374b-ab1f-423b-b6aa-06f078e3269d"
+			},
+			{
+				"name": "Fiction",
+				"slug": "fiction",
+				"uid": "12de1ac4-9cbc-4b06-995e-c50999706ab3"
+			},
+			{
+				"name": "Rocketlauncher",
+				"slug": "rocketlauncher",
+				"uid": "378bad14-95d5-4912-a986-5d938afa7b34"
+			},
+			{
+				"name": "Turret",
+				"slug": "turret",
+				"uid": "c126cc28-0ed6-4fa5-bcd6-592191253ca9"
+			},
+			{
+				"name": "Military",
+				"slug": "military",
+				"uid": "d72bfec9-cfd7-44c0-85d9-eac5049405aa"
+			}
+		],
+		"category":
+		{
+			"name": "Weapons & Combat",
+			"path": "weapons-combat",
+			"slug": "weapons-combat",
+			"uid": "923f0caf-2fed-4ab4-94a3-e0a86ff711b0"
+		},
+		"assetFormats": [
+			{
+				"assetFormatType":
+				{
+					"name": "OBJ",
+					"groupName": "3D Exchange Formats",
+					"code": "obj",
+					"icon": "cube",
+					"extensions": [
+						"obj"
+					]
+				}
+			},
+			{
+				"assetFormatType":
+				{
+					"name": "Converted Files",
+					"groupName": "",
+					"code": "converted-files",
+					"icon": "cube",
+					"extensions": [
+						"gltf",
+						"glb",
+						"usdz"
+					]
+				}
+			}
+		],
+		"_PluginMetas":
+		{
+			"apiDataVersion": "0.0.1",
+			"entitlementUid": "f571aa0e-e386-4954-9f85-3416e998dc97",
+			"cacheSize": 0,
+			"downloaded": []
+		}
+	},
+	"target": "UE_5.6",
+	"quality": "",
+	"format": "obj",
+	"fileId": "b180e47a-4e1f-4021-be76-a7fb9ea359a0",
+	"platformIncluded": "",
+	"distributionPointBaseUrls": [],
+	"distributionMethod": "",
+	"entitlementUid": "f571aa0e-e386-4954-9f85-3416e998dc97",
+	"invertedNormal": false,
+	"isConverted": false,
+	"isQuixel": false
+}

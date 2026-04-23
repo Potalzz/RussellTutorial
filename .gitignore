@@ -1,0 +1,40 @@
+# Visual Studio / local IDE state
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+
+# Unreal generated files
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+*.opensdf
+*.sdf
+*.sln.DotSettings.user
+
+# Plugin generated files
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# Build products and debug symbols
+*.dll
+*.exe
+*.exp
+*.lib
+*.pdb
+*.ilk
+
+# Logs and crash output
+*.log
+*.tmp
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini

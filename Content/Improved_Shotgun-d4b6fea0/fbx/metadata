@@ -1,0 +1,107 @@
+{
+	"assetNamespace": "fab",
+	"listing":
+	{
+		"averageRating": 0,
+		"createdAt": "",
+		"description": "<p>Better textured version of this model - <a target=\"_blank\" href=\"https://sketchfab.com/3d-models/shotgun-58c533ec67fd4f24afeb373c9753e058\" rel=\"noopener noreferrer nofollow\">https://sketchfab.com/3d-models/shotgun-58c533ec67fd4f24afeb373c9753e058</a>\nAlso free.</p>",
+		"isAiForbidden": false,
+		"isAiGenerated": false,
+		"lastUpdatedAt": "",
+		"listingType": "3d-model",
+		"media": "https://media.fab.com/image_previews/gallery_images/7da75a08-53a2-4f90-a458-99a3eb7e6d83/c672c80c-3409-4e5f-b9b1-d127646b4bcb.jpeg",
+		"publishedAt": "2024-12-31T15:40:38.983135Z",
+		"reviewCount": 0,
+		"thumbnail": "https://media.fab.com/image_previews/gallery_images/e79fe8b7-b9ea-42ad-88ec-e58070d7e6a9/06fa224e-2357-49cd-a53b-ad7803df1970.jpeg",
+		"title": "Improved Shotgun",
+		"uid": "d4b6fea0-0e63-4fd6-835d-9735c9afd83d",
+		"updatedAt": "",
+		"user":
+		{
+			"coverImageUrl": "",
+			"profileImageUrl": "",
+			"sellerName": "Neominigan",
+			"uid": "c8e40c46-ef62-44b6-81f4-d278b82f9dc2"
+		},
+		"tags": [
+			{
+				"name": "Shot",
+				"slug": "shot",
+				"uid": "143cf791-36ae-4e14-9a19-e029c9107564"
+			},
+			{
+				"name": "Firearm",
+				"slug": "firearm",
+				"uid": "54c8f6dd-fce8-480f-b482-d07ac386b875"
+			},
+			{
+				"name": "Neo",
+				"slug": "neo",
+				"uid": "5888b038-7c8c-43cf-8d2a-59db3c23592b"
+			},
+			{
+				"name": "Shotgun",
+				"slug": "shotgun",
+				"uid": "ae9a4b15-7de3-4a21-976f-71365b33e14d"
+			},
+			{
+				"name": "Weapon",
+				"slug": "weapon",
+				"uid": "cb5288be-1972-4807-9f2a-5f33ddffd407"
+			}
+		],
+		"category":
+		{
+			"name": "Weapons & Combat",
+			"path": "weapons-combat",
+			"slug": "weapons-combat",
+			"uid": "923f0caf-2fed-4ab4-94a3-e0a86ff711b0"
+		},
+		"assetFormats": [
+			{
+				"assetFormatType":
+				{
+					"name": "FBX",
+					"groupName": "3D Exchange Formats",
+					"code": "fbx",
+					"icon": "cube",
+					"extensions": [
+						"fbx"
+					]
+				}
+			},
+			{
+				"assetFormatType":
+				{
+					"name": "Converted Files",
+					"groupName": "",
+					"code": "converted-files",
+					"icon": "cube",
+					"extensions": [
+						"gltf",
+						"glb",
+						"usdz"
+					]
+				}
+			}
+		],
+		"_PluginMetas":
+		{
+			"apiDataVersion": "0.0.1",
+			"entitlementUid": "6d5b661f-6b6b-4e44-a590-b87f3c3bf0a7",
+			"cacheSize": 0,
+			"downloaded": []
+		}
+	},
+	"target": "UE_5.6",
+	"quality": "",
+	"format": "fbx",
+	"fileId": "183543cc-642e-4bb8-918c-cd540f5fdd4a",
+	"platformIncluded": "",
+	"distributionPointBaseUrls": [],
+	"distributionMethod": "",
+	"entitlementUid": "6d5b661f-6b6b-4e44-a590-b87f3c3bf0a7",
+	"invertedNormal": false,
+	"isConverted": false,
+	"isQuixel": false
+}
