@@ -2,10 +2,12 @@
 
 #include "RussellZombieCharacter.h"
 
+#include "AIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "RussellHealthComponent.h"
 #include "RussellTutorialGameMode.h"
 #include "UObject/ConstructorHelpers.h"
@@ -21,8 +23,13 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 	AttackRange = 135.0f;
 	AttackDamage = 12.0f;
 	AttackInterval = 1.15f;
+	PathRefreshInterval = 0.35f;
 	LastAttackTime = -1000.0f;
+	LastPathRequestTime = -1000.0f;
 	bIsDead = false;
+
+	AIControllerClass = AAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	GetCapsuleComponent()->InitCapsuleSize(42.0f, 92.0f);
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
@@ -152,8 +159,37 @@ void ARussellZombieCharacter::ChaseTarget(float DeltaSeconds)
 
 	if (Distance <= AttackRange)
 	{
+		if (AAIController* AIController = Cast<AAIController>(GetController()))
+		{
+			AIController->StopMovement();
+		}
+
 		AttackTarget();
 		return;
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		if (AAIController* AIController = Cast<AAIController>(GetController()))
+		{
+			if (const UPathFollowingComponent* PathFollowingComponent = AIController->GetPathFollowingComponent())
+			{
+				if (PathFollowingComponent->GetStatus() == EPathFollowingStatus::Moving)
+				{
+					return;
+				}
+			}
+
+			if (World->GetTimeSeconds() - LastPathRequestTime >= PathRefreshInterval)
+			{
+				LastPathRequestTime = World->GetTimeSeconds();
+				const EPathFollowingRequestResult::Type MoveResult = AIController->MoveToActor(TargetPlayer, AttackRange * 0.8f, true, true, false, nullptr, true);
+				if (MoveResult != EPathFollowingRequestResult::Failed)
+				{
+					return;
+				}
+			}
+		}
 	}
 
 	if (!FlatDirection.IsNearlyZero())

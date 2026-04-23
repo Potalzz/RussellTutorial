@@ -4,6 +4,7 @@
 
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "NavigationSystem.h"
 #include "RussellFirstPersonCharacter.h"
 #include "RussellSurvivalHUD.h"
 #include "RussellZombieCharacter.h"
@@ -97,6 +98,25 @@ FVector ARussellTutorialGameMode::FindSpawnLocation() const
 {
 	const ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
 	const FVector Origin = PlayerCharacter ? PlayerCharacter->GetActorLocation() : FVector::ZeroVector;
+
+	if (UWorld* World = GetWorld())
+	{
+		if (const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(World))
+		{
+			for (int32 AttemptIndex = 0; AttemptIndex < 16; ++AttemptIndex)
+			{
+				FNavLocation NavLocation;
+				if (NavSystem->GetRandomReachablePointInRadius(Origin, MaxSpawnRadius, NavLocation))
+				{
+					const FVector FlatOffset(NavLocation.Location.X - Origin.X, NavLocation.Location.Y - Origin.Y, 0.0f);
+					if (FlatOffset.SizeSquared() >= FMath::Square(MinSpawnRadius))
+					{
+						return NavLocation.Location + FVector(0.0f, 0.0f, 96.0f);
+					}
+				}
+			}
+		}
+	}
 
 	const float AngleRadians = FMath::FRandRange(0.0f, TWO_PI);
 	const float SpawnDistance = FMath::FRandRange(MinSpawnRadius, MaxSpawnRadius);

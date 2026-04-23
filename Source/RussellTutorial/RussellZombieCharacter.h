@@ -40,6 +40,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie")
 	float AttackInterval;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie", meta = (ClampMin = "0.05"))
+	float PathRefreshInterval;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	TObjectPtr<UAnimSequence> WalkAnimation;
 
@@ -67,5 +70,6 @@ private:
 
 	FTimerHandle ResumeWalkTimerHandle;
 	float LastAttackTime;
+	float LastPathRequestTime;
 	bool bIsDead;
 };
