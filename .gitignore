@@ -38,3 +38,7 @@ Plugins/*/Intermediate/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local-only workflow docs
+AGENTS.md
+PROJECT_PROGRESS.md
