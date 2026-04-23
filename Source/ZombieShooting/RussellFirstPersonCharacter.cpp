@@ -76,16 +76,32 @@ ARussellFirstPersonCharacter::ARussellFirstPersonCharacter()
 	RightHandMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RightHandMeshComponent->CastShadow = false;
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShotgunMeshAsset(TEXT("/Game/Improved_Shotgun/SM_ImprovedShotgun.SM_ImprovedShotgun"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShotgunMeshAsset(TEXT("/Game/Improved_Shotgun-d4b6fea0/fbx/improved-shotgun_extracted/source/1.1"));
 	if (ShotgunMeshAsset.Succeeded())
 	{
 		ShotgunStaticMesh = ShotgunMeshAsset.Object;
 	}
+	else
+	{
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> FallbackShotgunMeshAsset(TEXT("/Game/Improved_Shotgun/SM_ImprovedShotgun.SM_ImprovedShotgun"));
+		if (FallbackShotgunMeshAsset.Succeeded())
+		{
+			ShotgunStaticMesh = FallbackShotgunMeshAsset.Object;
+		}
+	}
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> RocketLauncherMeshAsset(TEXT("/Game/sA_Megapack_v1/sA_ShootingVfxPack/Meshes/SM_RocketLauncher.SM_RocketLauncher"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> RocketLauncherMeshAsset(TEXT("/Game/RPG7-ada63d7d/fbx/rpg7_extracted/source/RPG7_extracted/RPG7/RPG71.RPG71"));
 	if (RocketLauncherMeshAsset.Succeeded())
 	{
 		RPG7StaticMesh = RocketLauncherMeshAsset.Object;
+	}
+	else
+	{
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> FallbackRocketLauncherMeshAsset(TEXT("/Game/sA_Megapack_v1/sA_ShootingVfxPack/Meshes/SM_RocketLauncher.SM_RocketLauncher"));
+		if (FallbackRocketLauncherMeshAsset.Succeeded())
+		{
+			RPG7StaticMesh = FallbackRocketLauncherMeshAsset.Object;
+		}
 	}
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderMeshAsset(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
@@ -314,6 +330,7 @@ void ARussellFirstPersonCharacter::ApplyShotgunVisual()
 		if (ShotgunStaticMesh)
 		{
 			ShotgunMeshComponent->SetStaticMesh(ShotgunStaticMesh);
+			ApplyWeaponMaterials(ShotgunStaticMesh);
 		}
 
 		ShotgunMeshComponent->SetRelativeLocation(FVector(58.0f, 22.0f, -24.0f));
@@ -334,16 +351,30 @@ void ARussellFirstPersonCharacter::ApplyRPG7Visual()
 		if (RPG7StaticMesh)
 		{
 			ShotgunMeshComponent->SetStaticMesh(RPG7StaticMesh);
+			ApplyWeaponMaterials(RPG7StaticMesh);
 		}
+	}
 
-		ShotgunMeshComponent->SetRelativeLocation(FVector(50.0f, 24.0f, -24.0f));
+	const bool bUseImportedRPG7Mesh = RPG7StaticMesh && RPG7StaticMesh->GetPathName().Contains(TEXT("/Game/RPG7-ada63d7d/"));
+	if (ShotgunMeshComponent)
+	{
 		ShotgunMeshComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
-		ShotgunMeshComponent->SetRelativeScale3D(FVector(0.85f));
+
+		if (bUseImportedRPG7Mesh)
+		{
+			ShotgunMeshComponent->SetRelativeLocation(FVector(46.0f, 23.0f, -26.0f));
+			ShotgunMeshComponent->SetRelativeScale3D(FVector(2.2f));
+		}
+		else
+		{
+			ShotgunMeshComponent->SetRelativeLocation(FVector(50.0f, 24.0f, -24.0f));
+			ShotgunMeshComponent->SetRelativeScale3D(FVector(0.85f));
+		}
 	}
 
 	if (ShotgunMuzzleComponent)
 	{
-		ShotgunMuzzleComponent->SetRelativeLocation(FVector(0.0f, 62.0f, 0.0f));
+		ShotgunMuzzleComponent->SetRelativeLocation(bUseImportedRPG7Mesh ? FVector(0.0f, 23.5f, 3.0f) : FVector(0.0f, 62.0f, 0.0f));
 	}
 
 	if (RightForearmMeshComponent)
@@ -356,5 +387,21 @@ void ARussellFirstPersonCharacter::ApplyRPG7Visual()
 	{
 		RightHandMeshComponent->SetRelativeLocation(FVector(53.0f, 25.0f, -31.0f));
 		RightHandMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, -10.0f));
+	}
+}
+
+void ARussellFirstPersonCharacter::ApplyWeaponMaterials(UStaticMesh* WeaponMesh)
+{
+	if (!ShotgunMeshComponent || !WeaponMesh)
+	{
+		return;
+	}
+
+	const TArray<FStaticMaterial>& StaticMaterials = WeaponMesh->GetStaticMaterials();
+	const int32 MaterialSlotCount = FMath::Max(ShotgunMeshComponent->GetNumMaterials(), StaticMaterials.Num());
+	for (int32 MaterialIndex = 0; MaterialIndex < MaterialSlotCount; ++MaterialIndex)
+	{
+		UMaterialInterface* MaterialToApply = StaticMaterials.IsValidIndex(MaterialIndex) ? StaticMaterials[MaterialIndex].MaterialInterface : nullptr;
+		ShotgunMeshComponent->SetMaterial(MaterialIndex, MaterialToApply);
 	}
 }

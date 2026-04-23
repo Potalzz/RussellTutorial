@@ -105,6 +105,7 @@ protected:
 	void ApplyFirstPersonHandMaterial();
 	void ApplyShotgunVisual();
 	void ApplyRPG7Visual();
+	void ApplyWeaponMaterials(UStaticMesh* WeaponMesh);
 
 private:
 	bool bIsDead;

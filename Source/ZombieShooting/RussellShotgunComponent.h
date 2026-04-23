@@ -7,6 +7,7 @@
 #include "RussellShotgunComponent.generated.h"
 
 class ARussellMissileProjectile;
+class UNiagaraComponent;
 class UNiagaraSystem;
 
 UENUM(BlueprintType)
@@ -92,6 +93,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RPG7|FX", meta = (ClampMin = "0.01"))
 	float RPG7MuzzleEffectScale;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RPG7|FX", meta = (ClampMin = "0.0"))
+	float RPG7MuzzleEffectStopDelay;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDrawDebugTraces;
 
@@ -137,6 +141,6 @@ private:
 	bool FireInternal(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart);
 	bool FireMissile(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart);
 	void SpawnMuzzleFX(UWorld* World, const FVector& VisualStart, const FRotator& AimRotation) const;
-	void SpawnNiagaraFX(UWorld* World, UNiagaraSystem* NiagaraSystem, const FVector& Location, const FRotator& Rotation, float Scale) const;
+	UNiagaraComponent* SpawnNiagaraFX(UWorld* World, UNiagaraSystem* NiagaraSystem, const FVector& Location, const FRotator& Rotation, float Scale, float AutoDeactivateDelay = 0.0f) const;
 	float GetActiveFireInterval() const;
 };

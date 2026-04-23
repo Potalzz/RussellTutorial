@@ -48,6 +48,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Missile|FX", meta = (ClampMin = "0.01"))
 	float ExplosionEffectScale;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Missile|FX", meta = (ClampMin = "0.0"))
+	float ExplosionEffectStopDelay;
+
 	UFUNCTION()
 	void HandleHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
@@ -58,4 +61,5 @@ private:
 	bool bExploded;
 
 	void Explode(const FVector& ExplosionLocation);
+	void SpawnExplosionFX(UWorld* World, const FVector& ExplosionLocation) const;
 };

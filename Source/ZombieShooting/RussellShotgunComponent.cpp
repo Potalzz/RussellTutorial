@@ -7,9 +7,11 @@
 #include "Engine/World.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/Pawn.h"
+#include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "RussellMissileProjectile.h"
+#include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 
 URussellShotgunComponent::URussellShotgunComponent()
@@ -36,6 +38,7 @@ URussellShotgunComponent::URussellShotgunComponent()
 	MissileExplosionRadius = 350.0f;
 	MissileMuzzleOffset = 36.0f;
 	RPG7MuzzleEffectScale = 0.75f;
+	RPG7MuzzleEffectStopDelay = 0.18f;
 	bDrawDebugTraces = false;
 	DebugTraceDuration = 1.0f;
 
@@ -159,7 +162,7 @@ bool URussellShotgunComponent::FireMissile(AController* InstigatorController, co
 	const FRotator MissileRotation = MissileDirection.Rotation();
 	const FVector SpawnLocation = VisualStart + MissileDirection * MissileMuzzleOffset;
 
-	SpawnNiagaraFX(World, RPG7MuzzleEffect, VisualStart, MissileRotation, RPG7MuzzleEffectScale);
+	SpawnNiagaraFX(World, RPG7MuzzleEffect, VisualStart, MissileRotation, RPG7MuzzleEffectScale, RPG7MuzzleEffectStopDelay);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = Owner;
@@ -203,12 +206,33 @@ void URussellShotgunComponent::SpawnMuzzleFX(UWorld* World, const FVector& Visua
 	SpawnNiagaraFX(World, MuzzleFlashSystem, VisualStart, AimRotation, MuzzleFlashScale);
 }
 
-void URussellShotgunComponent::SpawnNiagaraFX(UWorld* World, UNiagaraSystem* NiagaraSystem, const FVector& Location, const FRotator& Rotation, float Scale) const
+UNiagaraComponent* URussellShotgunComponent::SpawnNiagaraFX(UWorld* World, UNiagaraSystem* NiagaraSystem, const FVector& Location, const FRotator& Rotation, float Scale, float AutoDeactivateDelay) const
 {
 	if (World && NiagaraSystem)
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, NiagaraSystem, Location, Rotation, FVector(Scale), true, true);
+		UNiagaraComponent* SpawnedComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, NiagaraSystem, Location, Rotation, FVector(Scale), true, true);
+		if (SpawnedComponent && AutoDeactivateDelay > 0.0f)
+		{
+			SpawnedComponent->SetAutoDestroy(true);
+
+			TWeakObjectPtr<UNiagaraComponent> WeakComponent = SpawnedComponent;
+			FTimerDelegate StopFxDelegate;
+			StopFxDelegate.BindLambda([WeakComponent]()
+			{
+				if (WeakComponent.IsValid())
+				{
+					WeakComponent->DestroyComponent();
+				}
+			});
+
+			FTimerHandle StopFxHandle;
+			World->GetTimerManager().SetTimer(StopFxHandle, StopFxDelegate, AutoDeactivateDelay, false);
+		}
+
+		return SpawnedComponent;
 	}
+
+	return nullptr;
 }
 
 float URussellShotgunComponent::GetActiveFireInterval() const

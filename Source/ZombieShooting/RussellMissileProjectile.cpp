@@ -11,6 +11,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 
 ARussellMissileProjectile::ARussellMissileProjectile()
@@ -21,6 +22,7 @@ ARussellMissileProjectile::ARussellMissileProjectile()
 	Damage = 120.0f;
 	ExplosionRadius = 350.0f;
 	ExplosionEffectScale = 0.8f;
+	ExplosionEffectStopDelay = 0.25f;
 	bExploded = false;
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
@@ -50,10 +52,19 @@ ARussellMissileProjectile::ARussellMissileProjectile()
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
 	ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> RocketMeshAsset(TEXT("/Game/sA_Megapack_v1/sA_ShootingVfxPack/Meshes/SM_Rocket.SM_Rocket"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> RocketMeshAsset(TEXT("/Game/RPG7-ada63d7d/fbx/rpg7_extracted/source/RPG7_extracted/RPG7/rocket.rocket"));
 	if (RocketMeshAsset.Succeeded())
 	{
 		MissileMeshComponent->SetStaticMesh(RocketMeshAsset.Object);
+		MissileMeshComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	}
+	else
+	{
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> FallbackRocketMeshAsset(TEXT("/Game/sA_Megapack_v1/sA_ShootingVfxPack/Meshes/SM_Rocket.SM_Rocket"));
+		if (FallbackRocketMeshAsset.Succeeded())
+		{
+			MissileMeshComponent->SetStaticMesh(FallbackRocketMeshAsset.Object);
+		}
 	}
 
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> TrailAsset(TEXT("/Game/sA_Megapack_v1/sA_ShootingVfxPack/FX/NiagaraSystems/NS_ROCKET_Trail.NS_ROCKET_Trail"));
@@ -122,11 +133,35 @@ void ARussellMissileProjectile::Explode(const FVector& ExplosionLocation)
 
 		UGameplayStatics::ApplyRadialDamage(this, Damage, ExplosionLocation, ExplosionRadius, UDamageType::StaticClass(), IgnoredActors, this, DamageInstigator.Get(), true);
 
-		if (ExplosionEffect)
-		{
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, ExplosionEffect, ExplosionLocation, FRotator::ZeroRotator, FVector(ExplosionEffectScale), true, true);
-		}
+		SpawnExplosionFX(World, ExplosionLocation);
 	}
 
 	Destroy();
+}
+
+void ARussellMissileProjectile::SpawnExplosionFX(UWorld* World, const FVector& ExplosionLocation) const
+{
+	if (!World || !ExplosionEffect)
+	{
+		return;
+	}
+
+	UNiagaraComponent* SpawnedComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, ExplosionEffect, ExplosionLocation, FRotator::ZeroRotator, FVector(ExplosionEffectScale), true, true);
+	if (SpawnedComponent && ExplosionEffectStopDelay > 0.0f)
+	{
+		SpawnedComponent->SetAutoDestroy(true);
+
+		TWeakObjectPtr<UNiagaraComponent> WeakComponent = SpawnedComponent;
+		FTimerDelegate StopFxDelegate;
+		StopFxDelegate.BindLambda([WeakComponent]()
+		{
+			if (WeakComponent.IsValid())
+			{
+				WeakComponent->DestroyComponent();
+			}
+		});
+
+		FTimerHandle StopFxHandle;
+		World->GetTimerManager().SetTimer(StopFxHandle, StopFxDelegate, ExplosionEffectStopDelay, false);
+	}
 }
