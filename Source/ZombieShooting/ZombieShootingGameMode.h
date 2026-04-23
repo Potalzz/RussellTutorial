@@ -68,6 +68,39 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Pickup", meta = (ClampMin = "100.0"))
 	float WeaponPickupSpawnRadius;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance")
+	bool bApplyPerformanceProfile;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 PerformanceOverallQualityLevel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance", meta = (ClampMin = "50.0", ClampMax = "100.0"))
+	float PerformanceResolutionQuality;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 PerformanceShadowQuality;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 PerformanceGlobalIlluminationQuality;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 PerformanceReflectionQuality;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 PerformancePostProcessQuality;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 PerformanceFoliageQuality;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance", meta = (ClampMin = "0.25", ClampMax = "1.0"))
+	float PerformanceShadowDistanceScale;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance")
+	bool bDisableMotionBlur;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance")
+	bool bDisableContactShadows;
+
 	void StartNextWave();
 	void SpawnZombie();
 	void SpawnWeaponPickup();
@@ -75,6 +108,7 @@ protected:
 	FVector FindWeaponPickupLocation() const;
 	const FRussellZombieVariantDefinition* ChooseZombieVariant() const;
 	void BuildDefaultZombieVariants();
+	void ApplyPerformanceProfile();
 
 private:
 	FTimerHandle SpawnTimerHandle;

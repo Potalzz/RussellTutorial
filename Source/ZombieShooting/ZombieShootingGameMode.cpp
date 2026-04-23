@@ -3,6 +3,7 @@
 #include "ZombieShootingGameMode.h"
 
 #include "Animation/AnimSequence.h"
+#include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
@@ -11,6 +12,7 @@
 #include "RussellSurvivalHUD.h"
 #include "RussellWeaponPickup.h"
 #include "RussellZombieCharacter.h"
+#include "Scalability.h"
 
 namespace
 {
@@ -58,6 +60,17 @@ AZombieShootingGameMode::AZombieShootingGameMode()
 	WeaponPickupClass = ARussellWeaponPickup::StaticClass();
 	WeaponPickupSpawnDelay = 15.0f;
 	WeaponPickupSpawnRadius = 1800.0f;
+	bApplyPerformanceProfile = true;
+	PerformanceOverallQualityLevel = 2;
+	PerformanceResolutionQuality = 85.0f;
+	PerformanceShadowQuality = 1;
+	PerformanceGlobalIlluminationQuality = 1;
+	PerformanceReflectionQuality = 1;
+	PerformancePostProcessQuality = 1;
+	PerformanceFoliageQuality = 1;
+	PerformanceShadowDistanceScale = 0.65f;
+	bDisableMotionBlur = true;
+	bDisableContactShadows = true;
 
 	WaveNumber = 0;
 	KillCount = 0;
@@ -72,6 +85,7 @@ void AZombieShootingGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ApplyPerformanceProfile();
 	StartNextWave();
 
 	if (WeaponPickupClass && WeaponPickupSpawnDelay >= 0.0f)
@@ -278,6 +292,42 @@ const FRussellZombieVariantDefinition* AZombieShootingGameMode::ChooseZombieVari
 	}
 
 	return &ZombieVariants.Last();
+}
+
+void AZombieShootingGameMode::ApplyPerformanceProfile()
+{
+	if (!bApplyPerformanceProfile || !GetWorld())
+	{
+		return;
+	}
+
+	Scalability::FQualityLevels QualityLevels = Scalability::GetQualityLevels();
+	QualityLevels.SetFromSingleQualityLevel(FMath::Clamp(PerformanceOverallQualityLevel, 0, 4));
+	QualityLevels.ResolutionQuality = PerformanceResolutionQuality;
+	QualityLevels.SetShadowQuality(FMath::Clamp(PerformanceShadowQuality, 0, 4));
+	QualityLevels.SetGlobalIlluminationQuality(FMath::Clamp(PerformanceGlobalIlluminationQuality, 0, 4));
+	QualityLevels.SetReflectionQuality(FMath::Clamp(PerformanceReflectionQuality, 0, 4));
+	QualityLevels.SetPostProcessQuality(FMath::Clamp(PerformancePostProcessQuality, 0, 4));
+	QualityLevels.SetFoliageQuality(FMath::Clamp(PerformanceFoliageQuality, 0, 4));
+	Scalability::SetQualityLevels(QualityLevels, true);
+
+	if (!GEngine)
+	{
+		return;
+	}
+
+	GEngine->Exec(GetWorld(), *FString::Printf(TEXT("r.ScreenPercentage %.0f"), PerformanceResolutionQuality));
+	GEngine->Exec(GetWorld(), *FString::Printf(TEXT("r.Shadow.DistanceScale %.2f"), PerformanceShadowDistanceScale));
+
+	if (bDisableMotionBlur)
+	{
+		GEngine->Exec(GetWorld(), TEXT("r.MotionBlurQuality 0"));
+	}
+
+	if (bDisableContactShadows)
+	{
+		GEngine->Exec(GetWorld(), TEXT("r.ContactShadows 0"));
+	}
 }
 
 void AZombieShootingGameMode::BuildDefaultZombieVariants()
