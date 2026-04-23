@@ -7,7 +7,7 @@
 #include "Chracter_CPlusPlus.generated.h"
 
 UCLASS()
-class RUSSELLTUTORIAL_API AChracter_CPlusPlus : public ACharacter
+class ZOMBIESHOOTING_API AChracter_CPlusPlus : public ACharacter
 {
 	GENERATED_BODY()
 

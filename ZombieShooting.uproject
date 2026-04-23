@@ -5,7 +5,7 @@
     "Description": "",
     "Modules": [
         {
-            "Name": "RussellTutorial",
+            "Name": "ZombieShooting",
             "Type": "Runtime",
             "LoadingPhase": "Default",
             "AdditionalDependencies": [

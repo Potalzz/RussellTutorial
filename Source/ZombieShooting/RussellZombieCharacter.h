@@ -10,7 +10,7 @@ class UAnimSequence;
 class URussellHealthComponent;
 
 UCLASS()
-class RUSSELLTUTORIAL_API ARussellZombieCharacter : public ACharacter
+class ZOMBIESHOOTING_API ARussellZombieCharacter : public ACharacter
 {
 	GENERATED_BODY()
 

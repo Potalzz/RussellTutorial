@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "RussellTutorialGameMode.generated.h"
+#include "ZombieShootingGameMode.generated.h"
 
 class ARussellZombieCharacter;
 
 UCLASS()
-class RUSSELLTUTORIAL_API ARussellTutorialGameMode : public AGameModeBase
+class ZOMBIESHOOTING_API AZombieShootingGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
-	ARussellTutorialGameMode();
+	AZombieShootingGameMode();
 
 	virtual void BeginPlay() override;
 

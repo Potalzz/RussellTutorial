@@ -9,7 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "RussellHealthComponent.h"
-#include "RussellTutorialGameMode.h"
+#include "ZombieShootingGameMode.h"
 #include "UObject/ConstructorHelpers.h"
 
 ARussellZombieCharacter::ARussellZombieCharacter()
@@ -134,7 +134,7 @@ void ARussellZombieCharacter::HandleHealthDepleted()
 
 	if (UWorld* World = GetWorld())
 	{
-		if (ARussellTutorialGameMode* GameMode = World->GetAuthGameMode<ARussellTutorialGameMode>())
+		if (AZombieShootingGameMode* GameMode = World->GetAuthGameMode<AZombieShootingGameMode>())
 		{
 			GameMode->NotifyZombieKilled(this);
 		}

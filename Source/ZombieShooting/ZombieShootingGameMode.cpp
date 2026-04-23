@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RussellTutorialGameMode.h"
+#include "ZombieShootingGameMode.h"
 
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -9,7 +9,7 @@
 #include "RussellSurvivalHUD.h"
 #include "RussellZombieCharacter.h"
 
-ARussellTutorialGameMode::ARussellTutorialGameMode()
+AZombieShootingGameMode::AZombieShootingGameMode()
 {
 	DefaultPawnClass = ARussellFirstPersonCharacter::StaticClass();
 	HUDClass = ARussellSurvivalHUD::StaticClass();
@@ -29,14 +29,14 @@ ARussellTutorialGameMode::ARussellTutorialGameMode()
 	TargetZombiesThisWave = 0;
 }
 
-void ARussellTutorialGameMode::BeginPlay()
+void AZombieShootingGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
 	StartNextWave();
 }
 
-void ARussellTutorialGameMode::NotifyZombieKilled(ARussellZombieCharacter* Zombie)
+void AZombieShootingGameMode::NotifyZombieKilled(ARussellZombieCharacter* Zombie)
 {
 	KillCount++;
 	AliveZombies = FMath::Max(0, AliveZombies - 1);
@@ -44,11 +44,11 @@ void ARussellTutorialGameMode::NotifyZombieKilled(ARussellZombieCharacter* Zombi
 	if (SpawnedThisWave >= TargetZombiesThisWave && AliveZombies <= 0)
 	{
 		GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-		GetWorldTimerManager().SetTimer(NextWaveTimerHandle, this, &ARussellTutorialGameMode::StartNextWave, NextWaveDelay, false);
+		GetWorldTimerManager().SetTimer(NextWaveTimerHandle, this, &AZombieShootingGameMode::StartNextWave, NextWaveDelay, false);
 	}
 }
 
-void ARussellTutorialGameMode::RestartCurrentLevel()
+void AZombieShootingGameMode::RestartCurrentLevel()
 {
 	const FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(this, true);
 	if (!CurrentLevelName.IsEmpty())
@@ -57,17 +57,17 @@ void ARussellTutorialGameMode::RestartCurrentLevel()
 	}
 }
 
-void ARussellTutorialGameMode::StartNextWave()
+void AZombieShootingGameMode::StartNextWave()
 {
 	WaveNumber++;
 	SpawnedThisWave = 0;
 	TargetZombiesThisWave = InitialZombiesPerWave + (WaveNumber - 1) * AdditionalZombiesPerWave;
 
 	GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ARussellTutorialGameMode::SpawnZombie, SpawnInterval, true, 0.2f);
+	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AZombieShootingGameMode::SpawnZombie, SpawnInterval, true, 0.2f);
 }
 
-void ARussellTutorialGameMode::SpawnZombie()
+void AZombieShootingGameMode::SpawnZombie()
 {
 	UWorld* World = GetWorld();
 	if (!World || !ZombieClass || SpawnedThisWave >= TargetZombiesThisWave)
@@ -94,7 +94,7 @@ void ARussellTutorialGameMode::SpawnZombie()
 	}
 }
 
-FVector ARussellTutorialGameMode::FindSpawnLocation() const
+FVector AZombieShootingGameMode::FindSpawnLocation() const
 {
 	const ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
 	const FVector Origin = PlayerCharacter ? PlayerCharacter->GetActorLocation() : FVector::ZeroVector;

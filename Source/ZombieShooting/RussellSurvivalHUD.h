@@ -7,7 +7,7 @@
 #include "RussellSurvivalHUD.generated.h"
 
 UCLASS()
-class RUSSELLTUTORIAL_API ARussellSurvivalHUD : public AHUD
+class ZOMBIESHOOTING_API ARussellSurvivalHUD : public AHUD
 {
 	GENERATED_BODY()
 

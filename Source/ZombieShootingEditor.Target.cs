@@ -3,14 +3,14 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class RussellTutorialTarget : TargetRules
+public class ZombieShootingEditorTarget : TargetRules
 {
-    public RussellTutorialTarget(TargetInfo Target) : base(Target)
+    public ZombieShootingEditorTarget(TargetInfo Target) : base(Target)
     {
-		Type = TargetType.Game;
+		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
 
-		ExtraModuleNames.AddRange(new string[] { "RussellTutorial" });
+		ExtraModuleNames.AddRange(new string[] { "ZombieShooting" });
 	}
 }

@@ -10,7 +10,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRussellHealthChangedSignature, flo
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRussellHealthDepletedSignature);
 
 UCLASS(ClassGroup=(Russell), meta=(BlueprintSpawnableComponent))
-class RUSSELLTUTORIAL_API URussellHealthComponent : public UActorComponent
+class ZOMBIESHOOTING_API URussellHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

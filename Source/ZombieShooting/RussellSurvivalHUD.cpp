@@ -6,7 +6,7 @@
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
 #include "RussellFirstPersonCharacter.h"
-#include "RussellTutorialGameMode.h"
+#include "ZombieShootingGameMode.h"
 
 ARussellSurvivalHUD::ARussellSurvivalHUD()
 {
@@ -22,7 +22,7 @@ void ARussellSurvivalHUD::DrawHUD()
 
 	APlayerController* PlayerController = GetOwningPlayerController();
 	ARussellFirstPersonCharacter* PlayerCharacter = PlayerController ? Cast<ARussellFirstPersonCharacter>(PlayerController->GetPawn()) : nullptr;
-	ARussellTutorialGameMode* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ARussellTutorialGameMode>() : nullptr;
+	AZombieShootingGameMode* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AZombieShootingGameMode>() : nullptr;
 
 	if (PlayerCharacter)
 	{

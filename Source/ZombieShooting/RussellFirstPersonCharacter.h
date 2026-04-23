@@ -12,7 +12,7 @@ class URussellShotgunComponent;
 class UStaticMeshComponent;
 
 UCLASS()
-class RUSSELLTUTORIAL_API ARussellFirstPersonCharacter : public ACharacter
+class ZOMBIESHOOTING_API ARussellFirstPersonCharacter : public ACharacter
 {
 	GENERATED_BODY()
 

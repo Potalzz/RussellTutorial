@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class RussellTutorial : ModuleRules
+public class ZombieShooting : ModuleRules
 {
-    public RussellTutorial(ReadOnlyTargetRules Target) : base(Target)
+    public ZombieShooting(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 

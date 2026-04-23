@@ -7,7 +7,7 @@
 #include "RussellShotgunComponent.generated.h"
 
 UCLASS(ClassGroup=(Russell), meta=(BlueprintSpawnableComponent))
-class RUSSELLTUTORIAL_API URussellShotgunComponent : public UActorComponent
+class ZOMBIESHOOTING_API URussellShotgunComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

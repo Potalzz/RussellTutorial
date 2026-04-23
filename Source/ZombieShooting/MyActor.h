@@ -7,7 +7,7 @@
 #include "MyActor.generated.h"
 
 UCLASS()
-class RUSSELLTUTORIAL_API AMyActor : public AActor
+class ZOMBIESHOOTING_API AMyActor : public AActor
 {
     GENERATED_BODY()
 
