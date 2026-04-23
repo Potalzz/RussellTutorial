@@ -32,6 +32,7 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	GetCapsuleComponent()->InitCapsuleSize(42.0f, 92.0f);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 420.0f, 0.0f);
@@ -39,6 +40,7 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -92.0f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> ZombieMeshAsset(TEXT("/Game/UndeadPack/Zombie/Mesh/SK_Zombie.SK_Zombie"));
 	if (ZombieMeshAsset.Succeeded())
