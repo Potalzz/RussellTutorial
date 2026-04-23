@@ -7,6 +7,7 @@
 #include "NavigationSystem.h"
 #include "RussellFirstPersonCharacter.h"
 #include "RussellSurvivalHUD.h"
+#include "RussellWeaponPickup.h"
 #include "RussellZombieCharacter.h"
 
 AZombieShootingGameMode::AZombieShootingGameMode()
@@ -21,6 +22,9 @@ AZombieShootingGameMode::AZombieShootingGameMode()
 	MinSpawnRadius = 1200.0f;
 	MaxSpawnRadius = 2200.0f;
 	NextWaveDelay = 4.0f;
+	WeaponPickupClass = ARussellWeaponPickup::StaticClass();
+	WeaponPickupSpawnDelay = 15.0f;
+	WeaponPickupSpawnRadius = 1800.0f;
 
 	WaveNumber = 0;
 	KillCount = 0;
@@ -34,6 +38,11 @@ void AZombieShootingGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	StartNextWave();
+
+	if (WeaponPickupClass && WeaponPickupSpawnDelay >= 0.0f)
+	{
+		GetWorldTimerManager().SetTimer(WeaponPickupTimerHandle, this, &AZombieShootingGameMode::SpawnWeaponPickup, WeaponPickupSpawnDelay, false);
+	}
 }
 
 void AZombieShootingGameMode::NotifyZombieKilled(ARussellZombieCharacter* Zombie)
@@ -94,6 +103,23 @@ void AZombieShootingGameMode::SpawnZombie()
 	}
 }
 
+void AZombieShootingGameMode::SpawnWeaponPickup()
+{
+	UWorld* World = GetWorld();
+	if (!World || !WeaponPickupClass)
+	{
+		return;
+	}
+
+	const FVector SpawnLocation = FindWeaponPickupLocation();
+	const FRotator SpawnRotation(0.0f, FMath::FRandRange(0.0f, 360.0f), 0.0f);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	World->SpawnActor<ARussellWeaponPickup>(WeaponPickupClass, SpawnLocation, SpawnRotation, SpawnParams);
+}
+
 FVector AZombieShootingGameMode::FindSpawnLocation() const
 {
 	const ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
@@ -136,4 +162,45 @@ FVector AZombieShootingGameMode::FindSpawnLocation() const
 	}
 
 	return Candidate;
+}
+
+FVector AZombieShootingGameMode::FindWeaponPickupLocation() const
+{
+	const ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+	const FVector Origin = PlayerCharacter ? PlayerCharacter->GetActorLocation() : FVector::ZeroVector;
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return Origin;
+	}
+
+	FVector Candidate = Origin;
+	if (const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(World))
+	{
+		FNavLocation NavLocation;
+		if (NavSystem->GetRandomReachablePointInRadius(Origin, WeaponPickupSpawnRadius, NavLocation))
+		{
+			Candidate = NavLocation.Location;
+		}
+	}
+
+	if (Candidate.Equals(Origin))
+	{
+		const float AngleRadians = FMath::FRandRange(0.0f, TWO_PI);
+		const float SpawnDistance = FMath::FRandRange(300.0f, WeaponPickupSpawnRadius);
+		Candidate = Origin + FVector(FMath::Cos(AngleRadians) * SpawnDistance, FMath::Sin(AngleRadians) * SpawnDistance, 250.0f);
+	}
+
+	FHitResult HitResult;
+	const FVector TraceStart = Candidate + FVector(0.0f, 0.0f, 1200.0f);
+	const FVector TraceEnd = Candidate - FVector(0.0f, 0.0f, 2500.0f);
+
+	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(RussellPickupSpawnTrace), false);
+	if (World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_WorldStatic, QueryParams))
+	{
+		return HitResult.Location + FVector(0.0f, 0.0f, 18.0f);
+	}
+
+	return Candidate + FVector(0.0f, 0.0f, 18.0f);
 }

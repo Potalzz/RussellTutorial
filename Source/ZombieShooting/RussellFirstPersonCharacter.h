@@ -11,6 +11,7 @@ class URussellHealthComponent;
 class URussellShotgunComponent;
 class UMaterialInterface;
 class USceneComponent;
+class UStaticMesh;
 class UStaticMeshComponent;
 
 UCLASS()
@@ -42,6 +43,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Player")
 	bool HasInfiniteAmmo() const;
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void EquipRPG7();
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	bool IsUsingRPG7() const;
+
 	UFUNCTION(BlueprintPure, Category = "Player")
 	bool IsDead() const { return bIsDead; }
 
@@ -67,6 +74,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UStaticMeshComponent> RightHandMeshComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Visual")
+	TObjectPtr<UStaticMesh> ShotgunStaticMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Visual")
+	TObjectPtr<UStaticMesh> RPG7StaticMesh;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UMaterialInterface> HandBaseMaterial;
 
@@ -90,6 +103,8 @@ protected:
 	void ReloadShotgun();
 	void RestartLevel();
 	void ApplyFirstPersonHandMaterial();
+	void ApplyShotgunVisual();
+	void ApplyRPG7Visual();
 
 private:
 	bool bIsDead;

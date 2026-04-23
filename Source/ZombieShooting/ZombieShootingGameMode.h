@@ -7,6 +7,7 @@
 #include "ZombieShootingGameMode.generated.h"
 
 class ARussellZombieCharacter;
+class ARussellWeaponPickup;
 
 UCLASS()
 class ZOMBIESHOOTING_API AZombieShootingGameMode : public AGameModeBase
@@ -55,13 +56,25 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Waves", meta = (ClampMin = "0.0"))
 	float NextWaveDelay;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Pickup")
+	TSubclassOf<ARussellWeaponPickup> WeaponPickupClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Pickup", meta = (ClampMin = "0.0"))
+	float WeaponPickupSpawnDelay;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Pickup", meta = (ClampMin = "100.0"))
+	float WeaponPickupSpawnRadius;
+
 	void StartNextWave();
 	void SpawnZombie();
+	void SpawnWeaponPickup();
 	FVector FindSpawnLocation() const;
+	FVector FindWeaponPickupLocation() const;
 
 private:
 	FTimerHandle SpawnTimerHandle;
 	FTimerHandle NextWaveTimerHandle;
+	FTimerHandle WeaponPickupTimerHandle;
 
 	int32 WaveNumber;
 	int32 KillCount;

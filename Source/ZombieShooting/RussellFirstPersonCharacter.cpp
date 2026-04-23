@@ -79,7 +79,13 @@ ARussellFirstPersonCharacter::ARussellFirstPersonCharacter()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShotgunMeshAsset(TEXT("/Game/Improved_Shotgun/SM_ImprovedShotgun.SM_ImprovedShotgun"));
 	if (ShotgunMeshAsset.Succeeded())
 	{
-		ShotgunMeshComponent->SetStaticMesh(ShotgunMeshAsset.Object);
+		ShotgunStaticMesh = ShotgunMeshAsset.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> RocketLauncherMeshAsset(TEXT("/Game/sA_Megapack_v1/sA_ShootingVfxPack/Meshes/SM_RocketLauncher.SM_RocketLauncher"));
+	if (RocketLauncherMeshAsset.Succeeded())
+	{
+		RPG7StaticMesh = RocketLauncherMeshAsset.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderMeshAsset(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
@@ -99,6 +105,8 @@ ARussellFirstPersonCharacter::ARussellFirstPersonCharacter()
 	{
 		HandBaseMaterial = HandMaterialAsset.Object;
 	}
+
+	ApplyShotgunVisual();
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
@@ -165,6 +173,21 @@ int32 ARussellFirstPersonCharacter::GetMaxAmmo() const
 bool ARussellFirstPersonCharacter::HasInfiniteAmmo() const
 {
 	return ShotgunComponent ? ShotgunComponent->HasInfiniteAmmo() : false;
+}
+
+void ARussellFirstPersonCharacter::EquipRPG7()
+{
+	if (ShotgunComponent)
+	{
+		ShotgunComponent->SetWeaponMode(ERussellWeaponMode::RPG7);
+	}
+
+	ApplyRPG7Visual();
+}
+
+bool ARussellFirstPersonCharacter::IsUsingRPG7() const
+{
+	return ShotgunComponent ? ShotgunComponent->IsUsingRPG7() : false;
 }
 
 void ARussellFirstPersonCharacter::MoveForward(float Value)
@@ -281,5 +304,57 @@ void ARussellFirstPersonCharacter::ApplyFirstPersonHandMaterial()
 			HandMaterial->SetScalarParameterValue(TEXT("Roughness"), 0.7f);
 			HandMesh->SetMaterial(0, HandMaterial);
 		}
+	}
+}
+
+void ARussellFirstPersonCharacter::ApplyShotgunVisual()
+{
+	if (ShotgunMeshComponent)
+	{
+		if (ShotgunStaticMesh)
+		{
+			ShotgunMeshComponent->SetStaticMesh(ShotgunStaticMesh);
+		}
+
+		ShotgunMeshComponent->SetRelativeLocation(FVector(58.0f, 22.0f, -24.0f));
+		ShotgunMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+		ShotgunMeshComponent->SetRelativeScale3D(FVector(0.12f));
+	}
+
+	if (ShotgunMuzzleComponent)
+	{
+		ShotgunMuzzleComponent->SetRelativeLocation(FVector(508.0f, 0.0f, -6.0f));
+	}
+}
+
+void ARussellFirstPersonCharacter::ApplyRPG7Visual()
+{
+	if (ShotgunMeshComponent)
+	{
+		if (RPG7StaticMesh)
+		{
+			ShotgunMeshComponent->SetStaticMesh(RPG7StaticMesh);
+		}
+
+		ShotgunMeshComponent->SetRelativeLocation(FVector(50.0f, 24.0f, -24.0f));
+		ShotgunMeshComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+		ShotgunMeshComponent->SetRelativeScale3D(FVector(0.85f));
+	}
+
+	if (ShotgunMuzzleComponent)
+	{
+		ShotgunMuzzleComponent->SetRelativeLocation(FVector(0.0f, 62.0f, 0.0f));
+	}
+
+	if (RightForearmMeshComponent)
+	{
+		RightForearmMeshComponent->SetRelativeLocation(FVector(35.0f, 31.0f, -43.0f));
+		RightForearmMeshComponent->SetRelativeRotation(FRotator(90.0f, -8.0f, 2.0f));
+	}
+
+	if (RightHandMeshComponent)
+	{
+		RightHandMeshComponent->SetRelativeLocation(FVector(53.0f, 25.0f, -31.0f));
+		RightHandMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, -10.0f));
 	}
 }
