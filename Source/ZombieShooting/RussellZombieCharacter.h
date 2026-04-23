@@ -7,6 +7,7 @@
 #include "RussellZombieCharacter.generated.h"
 
 class UAnimSequence;
+class UNiagaraSystem;
 class URussellHealthComponent;
 
 UCLASS()
@@ -55,6 +56,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "0.1"))
 	float BloodFXThickness;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "1"))
+	int32 BloodMistPointCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "0.5"))
+	float BloodMistRadius;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "1.0"))
 	float BloodSprayDistance;
 
@@ -63,6 +70,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX")
 	FColor BloodFXColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX")
+	TObjectPtr<UNiagaraSystem> BloodImpactSystem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "0.01"))
+	float BloodImpactScale;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float BloodImpactOpacity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	TObjectPtr<UAnimSequence> WalkAnimation;

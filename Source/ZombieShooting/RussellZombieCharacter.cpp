@@ -9,6 +9,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "RussellHealthComponent.h"
 #include "ZombieShootingGameMode.h"
 #include "UObject/ConstructorHelpers.h"
@@ -29,12 +32,16 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 	LastPathRequestTime = -1000.0f;
 	bIsDead = false;
 	bShowBloodHitFX = true;
-	BloodSprayCount = 9;
-	BloodFXDuration = 0.45f;
-	BloodFXThickness = 3.0f;
-	BloodSprayDistance = 58.0f;
-	BloodSpraySpreadDegrees = 38.0f;
-	BloodFXColor = FColor(190, 0, 0);
+	BloodSprayCount = 18;
+	BloodFXDuration = 0.2f;
+	BloodFXThickness = 1.15f;
+	BloodMistPointCount = 14;
+	BloodMistRadius = 5.5f;
+	BloodSprayDistance = 44.0f;
+	BloodSpraySpreadDegrees = 56.0f;
+	BloodFXColor = FColor(135, 16, 16, 96);
+	BloodImpactScale = 0.24f;
+	BloodImpactOpacity = 0.38f;
 
 	AIControllerClass = AAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -78,6 +85,12 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 	if (DeathAnimAsset.Succeeded())
 	{
 		DeathAnimation = DeathAnimAsset.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> BloodImpactAsset(TEXT("/Game/sA_Megapack_v1/sA_Projectilevfx/Vfx/Fx/Niagara_Systems/NS_Hit5.NS_Hit5"));
+	if (BloodImpactAsset.Succeeded())
+	{
+		BloodImpactSystem = BloodImpactAsset.Object;
 	}
 }
 
@@ -280,15 +293,59 @@ void ARussellZombieCharacter::SpawnBloodHitFX(const FDamageEvent& DamageEvent)
 
 	const FVector SprayBaseDirection = ShotDirection.IsNearlyZero() ? GetActorForwardVector() : -ShotDirection.GetSafeNormal();
 	const float HalfAngleRadians = FMath::DegreesToRadians(BloodSpraySpreadDegrees);
+	const FLinearColor BloodTint = FLinearColor(
+		static_cast<float>(BloodFXColor.R) / 255.0f,
+		static_cast<float>(BloodFXColor.G) / 255.0f,
+		static_cast<float>(BloodFXColor.B) / 255.0f,
+		BloodImpactOpacity);
 
-	DrawDebugSphere(World, ImpactPoint, 10.0f, 16, BloodFXColor, false, BloodFXDuration, 0, BloodFXThickness);
+	if (BloodImpactSystem)
+	{
+		if (UNiagaraComponent* BloodImpactComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			World,
+			BloodImpactSystem,
+			ImpactPoint,
+			SprayBaseDirection.Rotation(),
+			FVector(BloodImpactScale),
+			true,
+			true))
+		{
+			BloodImpactComponent->SetVariableLinearColor(TEXT("User.Color"), BloodTint);
+			BloodImpactComponent->SetVariableLinearColor(TEXT("User.Tint"), BloodTint);
+			BloodImpactComponent->SetVariableLinearColor(TEXT("User.TintColor"), BloodTint);
+			BloodImpactComponent->SetVariableFloat(TEXT("User.Alpha"), BloodImpactOpacity);
+		}
+	}
+
+	const FVector RightVector = FVector::CrossProduct(SprayBaseDirection, FVector::UpVector).GetSafeNormal();
+	const FVector UpJitterBase = FVector::UpVector * 0.35f;
+
+	for (int32 MistIndex = 0; MistIndex < BloodMistPointCount; ++MistIndex)
+	{
+		const FVector RandomOffset =
+			RightVector * FMath::FRandRange(-BloodMistRadius, BloodMistRadius) +
+			FVector::UpVector * FMath::FRandRange(-BloodMistRadius * 0.25f, BloodMistRadius) +
+			SprayBaseDirection * FMath::FRandRange(0.0f, BloodMistRadius * 0.7f);
+		const float MistSize = FMath::FRandRange(1.2f, 2.8f);
+		DrawDebugPoint(World, ImpactPoint + RandomOffset, MistSize, BloodFXColor, false, BloodFXDuration, 0);
+	}
 
 	for (int32 SprayIndex = 0; SprayIndex < BloodSprayCount; ++SprayIndex)
 	{
-		const FVector SprayDirection = FMath::VRandCone(SprayBaseDirection, HalfAngleRadians);
-		const float SprayLength = FMath::FRandRange(BloodSprayDistance * 0.45f, BloodSprayDistance);
-		const FVector SprayEnd = ImpactPoint + SprayDirection * SprayLength;
-		DrawDebugLine(World, ImpactPoint, SprayEnd, BloodFXColor, false, BloodFXDuration, 0, BloodFXThickness);
-		DrawDebugPoint(World, SprayEnd, 7.0f, BloodFXColor, false, BloodFXDuration, 0);
+		const FVector SprayDirection = FMath::VRandCone((SprayBaseDirection + UpJitterBase).GetSafeNormal(), HalfAngleRadians);
+		const float SprayLength = FMath::FRandRange(BloodSprayDistance * 0.2f, BloodSprayDistance);
+		const FVector SegmentStart = ImpactPoint + SprayDirection * FMath::FRandRange(1.5f, 4.0f);
+		const FVector MidPoint = SegmentStart + SprayDirection * (SprayLength * FMath::FRandRange(0.2f, 0.45f));
+		const FVector SprayEnd = SegmentStart + SprayDirection * SprayLength;
+		const float TrailThickness = BloodFXThickness * FMath::FRandRange(0.45f, 0.95f);
+
+		DrawDebugLine(World, SegmentStart, MidPoint, BloodFXColor, false, BloodFXDuration, 0, TrailThickness);
+		DrawDebugPoint(World, SprayEnd, FMath::FRandRange(1.5f, 3.6f), BloodFXColor, false, BloodFXDuration, 0);
+
+		if (FMath::FRand() < 0.45f)
+		{
+			const FVector DropletEnd = SprayEnd + SprayDirection * FMath::FRandRange(1.5f, 6.0f);
+			DrawDebugPoint(World, DropletEnd, FMath::FRandRange(1.0f, 2.4f), BloodFXColor, false, BloodFXDuration, 0);
+		}
 	}
 }
