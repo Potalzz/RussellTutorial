@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "RussellShotgunComponent.h"
 #include "RussellFirstPersonCharacter.generated.h"
 
 class UCameraComponent;
 class URussellHealthComponent;
-class URussellShotgunComponent;
 class UMaterialInterface;
 class USceneComponent;
 class UStaticMesh;
@@ -84,6 +84,9 @@ protected:
 	TObjectPtr<UStaticMesh> RPG7StaticMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	ERussellWeaponMode StartingWeaponMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UMaterialInterface> HandBaseMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
@@ -105,6 +108,7 @@ protected:
 	void FireShotgun();
 	void ReloadShotgun();
 	void RestartLevel();
+	void InitializeStartingWeapon();
 	void ApplyFirstPersonHandMaterial();
 	void ApplyShotgunVisual();
 	void ApplyRPG7Visual();

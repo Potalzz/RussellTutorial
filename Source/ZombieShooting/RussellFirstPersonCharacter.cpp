@@ -28,6 +28,7 @@ ARussellFirstPersonCharacter::ARussellFirstPersonCharacter()
 	BaseEyeHeight = 64.0f;
 	bIsDead = false;
 	HandTint = FLinearColor(0.78f, 0.54f, 0.38f, 1.0f);
+	StartingWeaponMode = ERussellWeaponMode::Shotgun;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -136,6 +137,7 @@ void ARussellFirstPersonCharacter::BeginPlay()
 		HealthComponent->OnHealthDepleted.AddDynamic(this, &ARussellFirstPersonCharacter::HandleHealthDepleted);
 	}
 
+	InitializeStartingWeapon();
 	ApplyFirstPersonHandMaterial();
 }
 
@@ -289,6 +291,24 @@ void ARussellFirstPersonCharacter::RestartLevel()
 	{
 		UGameplayStatics::OpenLevel(this, FName(*CurrentLevelName));
 	}
+}
+
+void ARussellFirstPersonCharacter::InitializeStartingWeapon()
+{
+	if (!ShotgunComponent)
+	{
+		return;
+	}
+
+	ShotgunComponent->SetWeaponMode(StartingWeaponMode);
+
+	if (StartingWeaponMode == ERussellWeaponMode::RPG7)
+	{
+		ApplyRPG7Visual();
+		return;
+	}
+
+	ApplyShotgunVisual();
 }
 
 void ARussellFirstPersonCharacter::HandleHealthDepleted()
