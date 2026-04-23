@@ -6,6 +6,9 @@
 #include "Engine/DamageEvents.h"
 #include "Engine/World.h"
 #include "GameFramework/DamageType.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "UObject/ConstructorHelpers.h"
 
 URussellShotgunComponent::URussellShotgunComponent()
 {
@@ -18,11 +21,23 @@ URussellShotgunComponent::URussellShotgunComponent()
 	FireInterval = 0.75f;
 	MaxAmmo = 8;
 	bInfiniteReserve = true;
+	bInfiniteAmmo = true;
+	bShowPelletTracers = true;
+	PelletTracerDuration = 0.18f;
+	PelletTracerThickness = 2.5f;
+	PelletTracerColor = FColor(255, 212, 64);
+	MuzzleFlashScale = 0.35f;
 	bDrawDebugTraces = false;
 	DebugTraceDuration = 1.0f;
 
 	CurrentAmmo = MaxAmmo;
 	LastFireTime = -1000.0f;
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> MuzzleFlashAsset(TEXT("/Game/StarterContent/Particles/P_Sparks.P_Sparks"));
+	if (MuzzleFlashAsset.Succeeded())
+	{
+		MuzzleFlashEffect = MuzzleFlashAsset.Object;
+	}
 }
 
 void URussellShotgunComponent::BeginPlay()
@@ -34,6 +49,16 @@ void URussellShotgunComponent::BeginPlay()
 
 bool URussellShotgunComponent::Fire(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation)
 {
+	return FireInternal(InstigatorController, TraceStart, AimRotation, TraceStart);
+}
+
+bool URussellShotgunComponent::FireWithVisualStart(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart)
+{
+	return FireInternal(InstigatorController, TraceStart, AimRotation, VisualStart);
+}
+
+bool URussellShotgunComponent::FireInternal(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart)
+{
 	UWorld* World = GetWorld();
 	AActor* Owner = GetOwner();
 
@@ -42,8 +67,17 @@ bool URussellShotgunComponent::Fire(AController* InstigatorController, const FVe
 		return false;
 	}
 
-	CurrentAmmo = FMath::Max(0, CurrentAmmo - 1);
+	if (!bInfiniteAmmo)
+	{
+		CurrentAmmo = FMath::Max(0, CurrentAmmo - 1);
+	}
+	else
+	{
+		CurrentAmmo = MaxAmmo;
+	}
+
 	LastFireTime = World->GetTimeSeconds();
+	SpawnMuzzleFX(World, VisualStart, AimRotation);
 
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(RussellShotgunTrace), true, Owner);
 	QueryParams.AddIgnoredActor(Owner);
@@ -72,6 +106,12 @@ bool URussellShotgunComponent::Fire(AController* InstigatorController, const FVe
 		{
 			DrawDebugLine(World, TraceStart, DebugEnd, bHit ? FColor::Red : FColor::Green, false, DebugTraceDuration, 0, 1.0f);
 		}
+
+		if (bShowPelletTracers)
+		{
+			DrawDebugLine(World, VisualStart, DebugEnd, PelletTracerColor, false, PelletTracerDuration, 0, PelletTracerThickness);
+			DrawDebugPoint(World, DebugEnd, bHit ? 9.0f : 4.0f, bHit ? FColor::Orange : PelletTracerColor, false, PelletTracerDuration, 0);
+		}
 	}
 
 	if (bInfiniteReserve && CurrentAmmo <= 0)
@@ -95,5 +135,22 @@ bool URussellShotgunComponent::CanFire() const
 		return false;
 	}
 
-	return CurrentAmmo > 0 && World->GetTimeSeconds() - LastFireTime >= FireInterval;
+	const bool bHasAmmo = bInfiniteAmmo || CurrentAmmo > 0;
+	return bHasAmmo && World->GetTimeSeconds() - LastFireTime >= FireInterval;
+}
+
+void URussellShotgunComponent::SpawnMuzzleFX(UWorld* World, const FVector& VisualStart, const FRotator& AimRotation) const
+{
+	if (!World)
+	{
+		return;
+	}
+
+	if (MuzzleFlashEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(World, MuzzleFlashEffect, VisualStart, AimRotation, FVector(MuzzleFlashScale), true);
+	}
+
+	DrawDebugSphere(World, VisualStart, 8.0f, 12, FColor::Orange, false, 0.08f, 0, 1.5f);
+	DrawDebugDirectionalArrow(World, VisualStart, VisualStart + AimRotation.Vector() * 38.0f, 10.0f, FColor(255, 132, 24), false, 0.08f, 0, 1.5f);
 }

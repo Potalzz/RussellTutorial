@@ -4,6 +4,7 @@
 
 #include "AIController.h"
 #include "Components/CapsuleComponent.h"
+#include "DrawDebugHelpers.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -27,6 +28,13 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 	LastAttackTime = -1000.0f;
 	LastPathRequestTime = -1000.0f;
 	bIsDead = false;
+	bShowBloodHitFX = true;
+	BloodSprayCount = 9;
+	BloodFXDuration = 0.45f;
+	BloodFXThickness = 3.0f;
+	BloodSprayDistance = 58.0f;
+	BloodSpraySpreadDegrees = 38.0f;
+	BloodFXColor = FColor(190, 0, 0);
 
 	AIControllerClass = AAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -108,6 +116,11 @@ float ARussellZombieCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 {
 	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	const float AppliedDamage = HealthComponent->ApplyDamage(DamageAmount);
+
+	if (AppliedDamage > 0.0f)
+	{
+		SpawnBloodHitFX(DamageEvent);
+	}
 
 	if (AppliedDamage > 0.0f && !bIsDead && HitAnimation)
 	{
@@ -235,5 +248,47 @@ void ARussellZombieCharacter::ResumeWalkAnimation()
 	if (!bIsDead)
 	{
 		PlayAnimation(WalkAnimation, true);
+	}
+}
+
+void ARussellZombieCharacter::SpawnBloodHitFX(const FDamageEvent& DamageEvent)
+{
+	UWorld* World = GetWorld();
+	if (!World || !bShowBloodHitFX)
+	{
+		return;
+	}
+
+	FVector ImpactPoint = GetActorLocation() + FVector(0.0f, 0.0f, 76.0f);
+	FVector ShotDirection = -GetActorForwardVector();
+
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+		if (PointDamageEvent)
+		{
+			if (!PointDamageEvent->HitInfo.ImpactPoint.IsNearlyZero())
+			{
+				ImpactPoint = PointDamageEvent->HitInfo.ImpactPoint;
+			}
+			if (!PointDamageEvent->ShotDirection.IsNearlyZero())
+			{
+				ShotDirection = PointDamageEvent->ShotDirection.GetSafeNormal();
+			}
+		}
+	}
+
+	const FVector SprayBaseDirection = ShotDirection.IsNearlyZero() ? GetActorForwardVector() : -ShotDirection.GetSafeNormal();
+	const float HalfAngleRadians = FMath::DegreesToRadians(BloodSpraySpreadDegrees);
+
+	DrawDebugSphere(World, ImpactPoint, 10.0f, 16, BloodFXColor, false, BloodFXDuration, 0, BloodFXThickness);
+
+	for (int32 SprayIndex = 0; SprayIndex < BloodSprayCount; ++SprayIndex)
+	{
+		const FVector SprayDirection = FMath::VRandCone(SprayBaseDirection, HalfAngleRadians);
+		const float SprayLength = FMath::FRandRange(BloodSprayDistance * 0.45f, BloodSprayDistance);
+		const FVector SprayEnd = ImpactPoint + SprayDirection * SprayLength;
+		DrawDebugLine(World, ImpactPoint, SprayEnd, BloodFXColor, false, BloodFXDuration, 0, BloodFXThickness);
+		DrawDebugPoint(World, SprayEnd, 7.0f, BloodFXColor, false, BloodFXDuration, 0);
 	}
 }

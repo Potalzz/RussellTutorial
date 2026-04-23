@@ -9,6 +9,8 @@
 class UCameraComponent;
 class URussellHealthComponent;
 class URussellShotgunComponent;
+class UMaterialInterface;
+class USceneComponent;
 class UStaticMeshComponent;
 
 UCLASS()
@@ -38,6 +40,9 @@ public:
 	int32 GetMaxAmmo() const;
 
 	UFUNCTION(BlueprintPure, Category = "Player")
+	bool HasInfiniteAmmo() const;
+
+	UFUNCTION(BlueprintPure, Category = "Player")
 	bool IsDead() const { return bIsDead; }
 
 protected:
@@ -52,6 +57,21 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UStaticMeshComponent> ShotgunMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USceneComponent> ShotgunMuzzleComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UStaticMeshComponent> RightForearmMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UStaticMeshComponent> RightHandMeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UMaterialInterface> HandBaseMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	FLinearColor HandTint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	float BaseTurnRate;
@@ -69,6 +89,7 @@ protected:
 	void FireShotgun();
 	void ReloadShotgun();
 	void RestartLevel();
+	void ApplyFirstPersonHandMaterial();
 
 private:
 	bool bIsDead;

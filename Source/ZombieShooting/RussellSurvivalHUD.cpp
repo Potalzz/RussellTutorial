@@ -27,7 +27,10 @@ void ARussellSurvivalHUD::DrawHUD()
 	if (PlayerCharacter)
 	{
 		DrawStatusLine(FString::Printf(TEXT("Health: %.0f / %.0f"), PlayerCharacter->GetCurrentHealth(), PlayerCharacter->GetMaxHealth()), 0, TextColor);
-		DrawStatusLine(FString::Printf(TEXT("Ammo: %d / %d"), PlayerCharacter->GetCurrentAmmo(), PlayerCharacter->GetMaxAmmo()), 1, TextColor);
+		const FString AmmoText = PlayerCharacter->HasInfiniteAmmo()
+			? TEXT("Ammo: Infinite")
+			: FString::Printf(TEXT("Ammo: %d / %d"), PlayerCharacter->GetCurrentAmmo(), PlayerCharacter->GetMaxAmmo());
+		DrawStatusLine(AmmoText, 1, TextColor);
 
 		if (PlayerCharacter->IsDead())
 		{

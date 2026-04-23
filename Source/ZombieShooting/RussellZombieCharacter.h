@@ -43,6 +43,27 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie", meta = (ClampMin = "0.05"))
 	float PathRefreshInterval;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX")
+	bool bShowBloodHitFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "1"))
+	int32 BloodSprayCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "0.01"))
+	float BloodFXDuration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "0.1"))
+	float BloodFXThickness;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "1.0"))
+	float BloodSprayDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "0.0", ClampMax = "89.0"))
+	float BloodSpraySpreadDegrees;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX")
+	FColor BloodFXColor;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	TObjectPtr<UAnimSequence> WalkAnimation;
 
@@ -63,6 +84,7 @@ protected:
 	void AttackTarget();
 	void PlayAnimation(UAnimSequence* Animation, bool bLooping);
 	void ResumeWalkAnimation();
+	void SpawnBloodHitFX(const FDamageEvent& DamageEvent);
 
 private:
 	UPROPERTY()

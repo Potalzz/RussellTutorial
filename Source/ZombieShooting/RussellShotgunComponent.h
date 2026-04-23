@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "RussellShotgunComponent.generated.h"
 
+class UParticleSystem;
+
 UCLASS(ClassGroup=(Russell), meta=(BlueprintSpawnableComponent))
 class ZOMBIESHOOTING_API URussellShotgunComponent : public UActorComponent
 {
@@ -37,6 +39,27 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun")
 	bool bInfiniteReserve;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun")
+	bool bInfiniteAmmo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun|FX")
+	bool bShowPelletTracers;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun|FX", meta = (ClampMin = "0.01"))
+	float PelletTracerDuration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun|FX", meta = (ClampMin = "0.1"))
+	float PelletTracerThickness;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun|FX")
+	FColor PelletTracerColor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun|FX")
+	TObjectPtr<UParticleSystem> MuzzleFlashEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun|FX", meta = (ClampMin = "0.01"))
+	float MuzzleFlashScale;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDrawDebugTraces;
 
@@ -45,6 +68,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Shotgun")
 	bool Fire(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation);
+
+	UFUNCTION(BlueprintCallable, Category = "Shotgun")
+	bool FireWithVisualStart(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart);
 
 	UFUNCTION(BlueprintCallable, Category = "Shotgun")
 	void Reload();
@@ -58,9 +84,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Shotgun")
 	int32 GetMaxAmmo() const { return MaxAmmo; }
 
+	UFUNCTION(BlueprintPure, Category = "Shotgun")
+	bool HasInfiniteAmmo() const { return bInfiniteAmmo; }
+
 private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Shotgun")
 	int32 CurrentAmmo;
 
 	float LastFireTime;
+
+	bool FireInternal(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart);
+	void SpawnMuzzleFX(UWorld* World, const FVector& VisualStart, const FRotator& AimRotation) const;
 };
