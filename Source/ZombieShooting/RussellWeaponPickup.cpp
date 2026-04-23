@@ -22,7 +22,6 @@ ARussellWeaponPickup::ARussellWeaponPickup()
 
 	PickupCollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("PickupCollision"));
 	PickupCollisionComponent->SetupAttachment(RootSceneComponent);
-	PickupCollisionComponent->InitSphereRadius(CollisionRadius);
 	PickupCollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	PickupCollisionComponent->SetCollisionObjectType(ECC_WorldDynamic);
 	PickupCollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -41,6 +40,13 @@ ARussellWeaponPickup::ARussellWeaponPickup()
 	}
 
 	PickupCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ARussellWeaponPickup::HandlePickupOverlap);
+	RefreshPickupCollision();
+}
+
+void ARussellWeaponPickup::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	RefreshPickupCollision();
 }
 
 void ARussellWeaponPickup::HandlePickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -59,4 +65,12 @@ void ARussellWeaponPickup::HandlePickupOverlap(UPrimitiveComponent* OverlappedCo
 	bConsumed = true;
 	PlayerCharacter->EquipRPG7();
 	Destroy();
+}
+
+void ARussellWeaponPickup::RefreshPickupCollision()
+{
+	if (PickupCollisionComponent)
+	{
+		PickupCollisionComponent->SetSphereRadius(CollisionRadius);
+	}
 }

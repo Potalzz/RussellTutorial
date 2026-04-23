@@ -18,6 +18,8 @@ class ZOMBIESHOOTING_API ARussellWeaponPickup : public AActor
 public:
 	ARussellWeaponPickup();
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pickup")
 	TObjectPtr<USceneComponent> RootSceneComponent;
@@ -36,4 +38,6 @@ protected:
 
 private:
 	bool bConsumed;
+
+	void RefreshPickupCollision();
 };

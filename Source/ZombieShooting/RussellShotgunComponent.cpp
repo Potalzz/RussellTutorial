@@ -85,20 +85,15 @@ bool URussellShotgunComponent::FireInternal(AController* InstigatorController, c
 		return false;
 	}
 
-	if (!bInfiniteAmmo)
-	{
-		CurrentAmmo = FMath::Max(0, CurrentAmmo - 1);
-	}
-	else
-	{
-		CurrentAmmo = MaxAmmo;
-	}
-
-	LastFireTime = World->GetTimeSeconds();
-
 	if (WeaponMode == ERussellWeaponMode::RPG7)
 	{
-		return FireMissile(InstigatorController, TraceStart, AimRotation, VisualStart);
+		if (!FireMissile(InstigatorController, TraceStart, AimRotation, VisualStart))
+		{
+			return false;
+		}
+
+		RegisterSuccessfulShot(World);
+		return true;
 	}
 
 	SpawnMuzzleFX(World, VisualStart, AimRotation);
@@ -138,11 +133,7 @@ bool URussellShotgunComponent::FireInternal(AController* InstigatorController, c
 		}
 	}
 
-	if (bInfiniteReserve && CurrentAmmo <= 0)
-	{
-		Reload();
-	}
-
+	RegisterSuccessfulShot(World);
 	return true;
 }
 
@@ -181,6 +172,30 @@ bool URussellShotgunComponent::FireMissile(AController* InstigatorController, co
 void URussellShotgunComponent::Reload()
 {
 	CurrentAmmo = MaxAmmo;
+}
+
+void URussellShotgunComponent::RegisterSuccessfulShot(UWorld* World)
+{
+	if (!World)
+	{
+		return;
+	}
+
+	LastFireTime = World->GetTimeSeconds();
+
+	if (!bInfiniteAmmo)
+	{
+		CurrentAmmo = FMath::Max(0, CurrentAmmo - 1);
+
+		if (bInfiniteReserve && CurrentAmmo <= 0)
+		{
+			Reload();
+		}
+	}
+	else
+	{
+		CurrentAmmo = MaxAmmo;
+	}
 }
 
 bool URussellShotgunComponent::CanFire() const

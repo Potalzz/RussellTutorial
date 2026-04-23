@@ -109,6 +109,7 @@ protected:
 	const FRussellZombieVariantDefinition* ChooseZombieVariant() const;
 	void BuildDefaultZombieVariants();
 	void ApplyPerformanceProfile();
+	void WarmUpZombieVariantAssets();
 
 private:
 	FTimerHandle SpawnTimerHandle;

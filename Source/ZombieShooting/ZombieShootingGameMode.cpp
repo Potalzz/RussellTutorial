@@ -85,6 +85,7 @@ void AZombieShootingGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	WarmUpZombieVariantAssets();
 	ApplyPerformanceProfile();
 	StartNextWave();
 
@@ -327,6 +328,35 @@ void AZombieShootingGameMode::ApplyPerformanceProfile()
 	if (bDisableContactShadows)
 	{
 		GEngine->Exec(GetWorld(), TEXT("r.ContactShadows 0"));
+	}
+}
+
+void AZombieShootingGameMode::WarmUpZombieVariantAssets()
+{
+	for (const FRussellZombieVariantDefinition& VariantDefinition : ZombieVariants)
+	{
+		VariantDefinition.SkeletalMesh.LoadSynchronous();
+
+		for (const TSoftObjectPtr<UMaterialInterface>& MaterialOverride : VariantDefinition.MaterialOverrides)
+		{
+			MaterialOverride.LoadSynchronous();
+		}
+
+		const TArray<TArray<TSoftObjectPtr<UAnimSequence>>> AnimationGroups = {
+			VariantDefinition.Animations.LocomotionAnimations,
+			VariantDefinition.Animations.AttackAnimations,
+			VariantDefinition.Animations.HitAnimations,
+			VariantDefinition.Animations.DeathAnimations,
+			VariantDefinition.Animations.SpawnAnimations
+		};
+
+		for (const TArray<TSoftObjectPtr<UAnimSequence>>& AnimationGroup : AnimationGroups)
+		{
+			for (const TSoftObjectPtr<UAnimSequence>& Animation : AnimationGroup)
+			{
+				Animation.LoadSynchronous();
+			}
+		}
 	}
 }
 

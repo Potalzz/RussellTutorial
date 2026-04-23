@@ -143,6 +143,7 @@ private:
 
 	bool FireInternal(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart);
 	bool FireMissile(AController* InstigatorController, const FVector& TraceStart, const FRotator& AimRotation, const FVector& VisualStart);
+	void RegisterSuccessfulShot(UWorld* World);
 	void SpawnMuzzleFX(UWorld* World, const FVector& VisualStart, const FRotator& AimRotation) const;
 	UNiagaraComponent* SpawnNiagaraFX(UWorld* World, UNiagaraSystem* NiagaraSystem, const FVector& Location, const FRotator& Rotation, float Scale, float AutoDeactivateDelay = 0.0f) const;
 	float GetActiveFireInterval() const;
