@@ -2,6 +2,7 @@
 
 #include "RussellZombieCharacter.h"
 
+#include "Animation/AnimSequence.h"
 #include "AIController.h"
 #include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
@@ -14,6 +15,7 @@
 #include "NiagaraSystem.h"
 #include "RussellHealthComponent.h"
 #include "ZombieShootingGameMode.h"
+#include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 
 ARussellZombieCharacter::ARussellZombieCharacter()
@@ -31,6 +33,7 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 	LastAttackTime = -1000.0f;
 	LastPathRequestTime = -1000.0f;
 	bIsDead = false;
+	bIsSpawnAnimationActive = false;
 	bShowBloodHitFX = true;
 	BloodSprayCount = 18;
 	BloodFXDuration = 0.2f;
@@ -45,6 +48,7 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 
 	AIControllerClass = AAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	CurrentVariantId = TEXT("default_zombie");
 
 	GetCapsuleComponent()->InitCapsuleSize(42.0f, 92.0f);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
@@ -66,25 +70,31 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 	static ConstructorHelpers::FObjectFinder<UAnimSequence> WalkAnimAsset(TEXT("/Game/UndeadPack/Zombie/Animations/Anim_Walk.Anim_Walk"));
 	if (WalkAnimAsset.Succeeded())
 	{
-		WalkAnimation = WalkAnimAsset.Object;
+		LocomotionAnimation = WalkAnimAsset.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimSequence> AttackAnimAsset(TEXT("/Game/UndeadPack/Zombie/Animations/Anim_Attack1.Anim_Attack1"));
 	if (AttackAnimAsset.Succeeded())
 	{
-		AttackAnimation = AttackAnimAsset.Object;
+		AttackAnimationOptions.Add(AttackAnimAsset.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> AttackAnimAltAsset(TEXT("/Game/UndeadPack/Zombie/Animations/Anim_Attack2.Anim_Attack2"));
+	if (AttackAnimAltAsset.Succeeded())
+	{
+		AttackAnimationOptions.Add(AttackAnimAltAsset.Object);
 	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimSequence> HitAnimAsset(TEXT("/Game/UndeadPack/Zombie/Animations/Anim_Hit.Anim_Hit"));
 	if (HitAnimAsset.Succeeded())
 	{
-		HitAnimation = HitAnimAsset.Object;
+		HitAnimationOptions.Add(HitAnimAsset.Object);
 	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimSequence> DeathAnimAsset(TEXT("/Game/UndeadPack/Zombie/Animations/Anim_Death.Anim_Death"));
 	if (DeathAnimAsset.Succeeded())
 	{
-		DeathAnimation = DeathAnimAsset.Object;
+		DeathAnimationOptions.Add(DeathAnimAsset.Object);
 	}
 
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> BloodImpactAsset(TEXT("/Game/sA_Megapack_v1/sA_Projectilevfx/Vfx/Fx/Niagara_Systems/NS_Hit5.NS_Hit5"));
@@ -102,14 +112,17 @@ void ARussellZombieCharacter::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
 	AcquireTarget();
-	ResumeWalkAnimation();
+	if (!PlaySpawnAnimationIfNeeded())
+	{
+		ResumeLocomotionAnimation();
+	}
 }
 
 void ARussellZombieCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (bIsDead)
+	if (bIsDead || bIsSpawnAnimationActive)
 	{
 		return;
 	}
@@ -135,10 +148,15 @@ float ARussellZombieCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 		SpawnBloodHitFX(DamageEvent);
 	}
 
-	if (AppliedDamage > 0.0f && !bIsDead && HitAnimation)
+	if (AppliedDamage > 0.0f && !bIsDead)
 	{
-		PlayAnimation(HitAnimation, false);
-		GetWorldTimerManager().SetTimer(ResumeWalkTimerHandle, this, &ARussellZombieCharacter::ResumeWalkAnimation, 0.35f, false);
+		bIsSpawnAnimationActive = false;
+		if (UAnimSequence* HitAnimation = ChooseRandomAnimation(HitAnimationOptions))
+		{
+			PlayAnimation(HitAnimation, false);
+			const float ResumeDelay = FMath::Min(HitAnimation->GetPlayLength(), 0.35f);
+			GetWorldTimerManager().SetTimer(ResumeWalkTimerHandle, this, &ARussellZombieCharacter::ResumeLocomotionAnimation, ResumeDelay, false);
+		}
 	}
 
 	return AppliedDamage > 0.0f ? AppliedDamage : ActualDamage;
@@ -157,7 +175,7 @@ void ARussellZombieCharacter::HandleHealthDepleted()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	PlayAnimation(DeathAnimation, false);
+	PlayAnimation(ChooseRandomAnimation(DeathAnimationOptions), false);
 	SetLifeSpan(6.0f);
 
 	if (UWorld* World = GetWorld())
@@ -240,9 +258,13 @@ void ARussellZombieCharacter::AttackTarget()
 	}
 
 	LastAttackTime = World->GetTimeSeconds();
-	PlayAnimation(AttackAnimation, false);
+	if (UAnimSequence* AttackAnimation = ChooseRandomAnimation(AttackAnimationOptions))
+	{
+		PlayAnimation(AttackAnimation, false);
+		const float ResumeDelay = FMath::Min(AttackAnimation->GetPlayLength(), AttackInterval);
+		GetWorldTimerManager().SetTimer(ResumeWalkTimerHandle, this, &ARussellZombieCharacter::ResumeLocomotionAnimation, ResumeDelay, false);
+	}
 	TargetPlayer->TakeDamage(AttackDamage, FDamageEvent(), GetController(), this);
-	GetWorldTimerManager().SetTimer(ResumeWalkTimerHandle, this, &ARussellZombieCharacter::ResumeWalkAnimation, 0.7f, false);
 }
 
 void ARussellZombieCharacter::PlayAnimation(UAnimSequence* Animation, bool bLooping)
@@ -256,11 +278,13 @@ void ARussellZombieCharacter::PlayAnimation(UAnimSequence* Animation, bool bLoop
 	GetMesh()->PlayAnimation(Animation, bLooping);
 }
 
-void ARussellZombieCharacter::ResumeWalkAnimation()
+void ARussellZombieCharacter::ResumeLocomotionAnimation()
 {
+	bIsSpawnAnimationActive = false;
+
 	if (!bIsDead)
 	{
-		PlayAnimation(WalkAnimation, true);
+		PlayAnimation(LocomotionAnimation, true);
 	}
 }
 
@@ -348,4 +372,118 @@ void ARussellZombieCharacter::SpawnBloodHitFX(const FDamageEvent& DamageEvent)
 			DrawDebugPoint(World, DropletEnd, FMath::FRandRange(1.0f, 2.4f), BloodFXColor, false, BloodFXDuration, 0);
 		}
 	}
+}
+
+void ARussellZombieCharacter::ApplyVariantDefinition(const FRussellZombieVariantDefinition& VariantDefinition)
+{
+	CurrentVariantId = VariantDefinition.VariantId.IsNone() ? TEXT("unnamed_variant") : VariantDefinition.VariantId;
+
+	if (USkeletalMesh* VariantMesh = VariantDefinition.SkeletalMesh.LoadSynchronous())
+	{
+		GetMesh()->SetSkeletalMesh(VariantMesh);
+	}
+
+	GetCapsuleComponent()->SetCapsuleSize(VariantDefinition.CapsuleRadius, VariantDefinition.CapsuleHalfHeight);
+	GetMesh()->SetRelativeLocation(VariantDefinition.MeshRelativeLocation);
+	GetMesh()->SetRelativeRotation(VariantDefinition.MeshRelativeRotation);
+	GetMesh()->SetRelativeScale3D(VariantDefinition.MeshRelativeScale);
+
+	if (!VariantDefinition.MaterialOverrides.IsEmpty())
+	{
+		for (int32 MaterialIndex = 0; MaterialIndex < VariantDefinition.MaterialOverrides.Num(); ++MaterialIndex)
+		{
+			if (UMaterialInterface* Material = VariantDefinition.MaterialOverrides[MaterialIndex].LoadSynchronous())
+			{
+				GetMesh()->SetMaterial(MaterialIndex, Material);
+			}
+		}
+	}
+
+	WalkSpeed = VariantDefinition.WalkSpeed;
+	AttackRange = VariantDefinition.AttackRange;
+	AttackDamage = VariantDefinition.AttackDamage;
+	AttackInterval = VariantDefinition.AttackInterval;
+
+	if (HealthComponent)
+	{
+		HealthComponent->MaxHealth = VariantDefinition.MaxHealth;
+		HealthComponent->ResetHealth();
+	}
+
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+	if (!VariantDefinition.Animations.LocomotionAnimations.IsEmpty())
+	{
+		TArray<TObjectPtr<UAnimSequence>> LoadedLocomotionAnimations;
+		LoadAnimationOptions(VariantDefinition.Animations.LocomotionAnimations, LoadedLocomotionAnimations);
+		if (UAnimSequence* SelectedLocomotion = ChooseRandomAnimation(LoadedLocomotionAnimations))
+		{
+			LocomotionAnimation = SelectedLocomotion;
+		}
+	}
+
+	if (!VariantDefinition.Animations.AttackAnimations.IsEmpty())
+	{
+		LoadAnimationOptions(VariantDefinition.Animations.AttackAnimations, AttackAnimationOptions);
+	}
+
+	if (!VariantDefinition.Animations.HitAnimations.IsEmpty())
+	{
+		LoadAnimationOptions(VariantDefinition.Animations.HitAnimations, HitAnimationOptions);
+	}
+
+	if (!VariantDefinition.Animations.DeathAnimations.IsEmpty())
+	{
+		LoadAnimationOptions(VariantDefinition.Animations.DeathAnimations, DeathAnimationOptions);
+	}
+
+	if (!VariantDefinition.Animations.SpawnAnimations.IsEmpty())
+	{
+		LoadAnimationOptions(VariantDefinition.Animations.SpawnAnimations, SpawnAnimationOptions);
+	}
+	else
+	{
+		SpawnAnimationOptions.Reset();
+	}
+}
+
+UAnimSequence* ARussellZombieCharacter::ChooseRandomAnimation(const TArray<TObjectPtr<UAnimSequence>>& AnimationOptions) const
+{
+	if (AnimationOptions.IsEmpty())
+	{
+		return nullptr;
+	}
+
+	return AnimationOptions[FMath::RandHelper(AnimationOptions.Num())];
+}
+
+void ARussellZombieCharacter::LoadAnimationOptions(const TArray<TSoftObjectPtr<UAnimSequence>>& SoftAnimations, TArray<TObjectPtr<UAnimSequence>>& LoadedAnimations)
+{
+	LoadedAnimations.Reset();
+
+	for (const TSoftObjectPtr<UAnimSequence>& SoftAnimation : SoftAnimations)
+	{
+		if (UAnimSequence* Animation = SoftAnimation.LoadSynchronous())
+		{
+			LoadedAnimations.Add(Animation);
+		}
+	}
+}
+
+bool ARussellZombieCharacter::PlaySpawnAnimationIfNeeded()
+{
+	if (UAnimSequence* SpawnAnimation = ChooseRandomAnimation(SpawnAnimationOptions))
+	{
+		bIsSpawnAnimationActive = true;
+		PlayAnimation(SpawnAnimation, false);
+		GetWorldTimerManager().SetTimer(
+			ResumeWalkTimerHandle,
+			this,
+			&ARussellZombieCharacter::ResumeLocomotionAnimation,
+			SpawnAnimation->GetPlayLength(),
+			false);
+		return true;
+	}
+
+	return false;
 }

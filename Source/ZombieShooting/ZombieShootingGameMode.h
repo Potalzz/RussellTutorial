@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "RussellZombieCharacter.h"
 #include "ZombieShootingGameMode.generated.h"
 
-class ARussellZombieCharacter;
 class ARussellWeaponPickup;
 
 UCLASS()
@@ -37,6 +37,9 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Waves")
 	TSubclassOf<ARussellZombieCharacter> ZombieClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Waves|Variants")
+	TArray<FRussellZombieVariantDefinition> ZombieVariants;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Waves", meta = (ClampMin = "1"))
 	int32 InitialZombiesPerWave;
@@ -70,6 +73,8 @@ protected:
 	void SpawnWeaponPickup();
 	FVector FindSpawnLocation() const;
 	FVector FindWeaponPickupLocation() const;
+	const FRussellZombieVariantDefinition* ChooseZombieVariant() const;
+	void BuildDefaultZombieVariants();
 
 private:
 	FTimerHandle SpawnTimerHandle;
