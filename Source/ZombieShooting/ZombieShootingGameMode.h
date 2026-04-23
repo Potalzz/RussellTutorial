@@ -101,6 +101,27 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance")
 	bool bDisableContactShadows;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance|Mac")
+	bool bUseMacBookAirPerformanceProfile;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance|Mac", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 MacPerformanceOverallQualityLevel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance|Mac", meta = (ClampMin = "50.0", ClampMax = "100.0"))
+	float MacPerformanceResolutionQuality;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance|Mac", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 MacPerformanceShadowQuality;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance|Mac", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 MacPerformanceGlobalIlluminationQuality;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance|Mac", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 MacPerformanceReflectionQuality;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Performance|Mac", meta = (ClampMin = "0.25", ClampMax = "1.0"))
+	float MacPerformanceShadowDistanceScale;
+
 	void StartNextWave();
 	void SpawnZombie();
 	void SpawnWeaponPickup();

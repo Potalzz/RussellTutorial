@@ -71,6 +71,13 @@ AZombieShootingGameMode::AZombieShootingGameMode()
 	PerformanceShadowDistanceScale = 0.65f;
 	bDisableMotionBlur = true;
 	bDisableContactShadows = true;
+	bUseMacBookAirPerformanceProfile = true;
+	MacPerformanceOverallQualityLevel = 1;
+	MacPerformanceResolutionQuality = 75.0f;
+	MacPerformanceShadowQuality = 1;
+	MacPerformanceGlobalIlluminationQuality = 0;
+	MacPerformanceReflectionQuality = 0;
+	MacPerformanceShadowDistanceScale = 0.5f;
 
 	WaveNumber = 0;
 	KillCount = 0;
@@ -302,12 +309,31 @@ void AZombieShootingGameMode::ApplyPerformanceProfile()
 		return;
 	}
 
+	int32 OverallQualityLevel = PerformanceOverallQualityLevel;
+	float ResolutionQuality = PerformanceResolutionQuality;
+	int32 ShadowQuality = PerformanceShadowQuality;
+	int32 GlobalIlluminationQuality = PerformanceGlobalIlluminationQuality;
+	int32 ReflectionQuality = PerformanceReflectionQuality;
+	float ShadowDistanceScale = PerformanceShadowDistanceScale;
+
+#if PLATFORM_MAC
+	if (bUseMacBookAirPerformanceProfile)
+	{
+		OverallQualityLevel = MacPerformanceOverallQualityLevel;
+		ResolutionQuality = MacPerformanceResolutionQuality;
+		ShadowQuality = MacPerformanceShadowQuality;
+		GlobalIlluminationQuality = MacPerformanceGlobalIlluminationQuality;
+		ReflectionQuality = MacPerformanceReflectionQuality;
+		ShadowDistanceScale = MacPerformanceShadowDistanceScale;
+	}
+#endif
+
 	Scalability::FQualityLevels QualityLevels = Scalability::GetQualityLevels();
-	QualityLevels.SetFromSingleQualityLevel(FMath::Clamp(PerformanceOverallQualityLevel, 0, 4));
-	QualityLevels.ResolutionQuality = PerformanceResolutionQuality;
-	QualityLevels.SetShadowQuality(FMath::Clamp(PerformanceShadowQuality, 0, 4));
-	QualityLevels.SetGlobalIlluminationQuality(FMath::Clamp(PerformanceGlobalIlluminationQuality, 0, 4));
-	QualityLevels.SetReflectionQuality(FMath::Clamp(PerformanceReflectionQuality, 0, 4));
+	QualityLevels.SetFromSingleQualityLevel(FMath::Clamp(OverallQualityLevel, 0, 4));
+	QualityLevels.ResolutionQuality = ResolutionQuality;
+	QualityLevels.SetShadowQuality(FMath::Clamp(ShadowQuality, 0, 4));
+	QualityLevels.SetGlobalIlluminationQuality(FMath::Clamp(GlobalIlluminationQuality, 0, 4));
+	QualityLevels.SetReflectionQuality(FMath::Clamp(ReflectionQuality, 0, 4));
 	QualityLevels.SetPostProcessQuality(FMath::Clamp(PerformancePostProcessQuality, 0, 4));
 	QualityLevels.SetFoliageQuality(FMath::Clamp(PerformanceFoliageQuality, 0, 4));
 	Scalability::SetQualityLevels(QualityLevels, true);
@@ -317,8 +343,8 @@ void AZombieShootingGameMode::ApplyPerformanceProfile()
 		return;
 	}
 
-	GEngine->Exec(GetWorld(), *FString::Printf(TEXT("r.ScreenPercentage %.0f"), PerformanceResolutionQuality));
-	GEngine->Exec(GetWorld(), *FString::Printf(TEXT("r.Shadow.DistanceScale %.2f"), PerformanceShadowDistanceScale));
+	GEngine->Exec(GetWorld(), *FString::Printf(TEXT("r.ScreenPercentage %.0f"), ResolutionQuality));
+	GEngine->Exec(GetWorld(), *FString::Printf(TEXT("r.Shadow.DistanceScale %.2f"), ShadowDistanceScale));
 
 	if (bDisableMotionBlur)
 	{
