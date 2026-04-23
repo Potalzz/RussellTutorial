@@ -21,6 +21,7 @@ Saved/
 # Plugin generated files
 Plugins/*/Binaries/
 Plugins/*/Intermediate/
+Plugins/UnrealMCP/
 
 # Build products and debug symbols
 *.dll
