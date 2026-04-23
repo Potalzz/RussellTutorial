@@ -29,12 +29,14 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 	AttackRange = 135.0f;
 	AttackDamage = 12.0f;
 	AttackInterval = 1.15f;
+	ZombieTickInterval = 0.1f;
 	PathRefreshInterval = 0.35f;
 	LastAttackTime = -1000.0f;
 	LastPathRequestTime = -1000.0f;
 	bIsDead = false;
 	bIsSpawnAnimationActive = false;
 	bShowBloodHitFX = true;
+	bShowBloodDebugTrails = false;
 	BloodSprayCount = 18;
 	BloodFXDuration = 0.2f;
 	BloodFXThickness = 1.15f;
@@ -102,6 +104,8 @@ ARussellZombieCharacter::ARussellZombieCharacter()
 	{
 		BloodImpactSystem = BloodImpactAsset.Object;
 	}
+
+	PrimaryActorTick.TickInterval = ZombieTickInterval;
 }
 
 void ARussellZombieCharacter::BeginPlay()
@@ -110,6 +114,7 @@ void ARussellZombieCharacter::BeginPlay()
 
 	HealthComponent->OnHealthDepleted.AddDynamic(this, &ARussellZombieCharacter::HandleHealthDepleted);
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	SetActorTickInterval(ZombieTickInterval);
 
 	AcquireTarget();
 	if (!PlaySpawnAnimationIfNeeded())
@@ -171,6 +176,7 @@ void ARussellZombieCharacter::HandleHealthDepleted()
 
 	bIsDead = true;
 	GetWorldTimerManager().ClearTimer(ResumeWalkTimerHandle);
+	SetActorTickEnabled(false);
 	GetCharacterMovement()->DisableMovement();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -343,6 +349,11 @@ void ARussellZombieCharacter::SpawnBloodHitFX(const FDamageEvent& DamageEvent)
 
 	const FVector RightVector = FVector::CrossProduct(SprayBaseDirection, FVector::UpVector).GetSafeNormal();
 	const FVector UpJitterBase = FVector::UpVector * 0.35f;
+
+	if (!bShowBloodDebugTrails)
+	{
+		return;
+	}
 
 	for (int32 MistIndex = 0; MistIndex < BloodMistPointCount; ++MistIndex)
 	{

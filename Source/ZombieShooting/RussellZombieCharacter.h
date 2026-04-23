@@ -121,11 +121,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie")
 	float AttackInterval;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|Performance", meta = (ClampMin = "0.01"))
+	float ZombieTickInterval;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie", meta = (ClampMin = "0.05"))
 	float PathRefreshInterval;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX")
 	bool bShowBloodHitFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX")
+	bool bShowBloodDebugTrails;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Zombie|FX", meta = (ClampMin = "1"))
 	int32 BloodSprayCount;
