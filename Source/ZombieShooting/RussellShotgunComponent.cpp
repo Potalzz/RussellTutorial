@@ -6,8 +6,8 @@
 #include "Engine/DamageEvents.h"
 #include "Engine/World.h"
 #include "GameFramework/DamageType.h"
-#include "Kismet/GameplayStatics.h"
-#include "Particles/ParticleSystem.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "UObject/ConstructorHelpers.h"
 
 URussellShotgunComponent::URussellShotgunComponent()
@@ -22,21 +22,21 @@ URussellShotgunComponent::URussellShotgunComponent()
 	MaxAmmo = 8;
 	bInfiniteReserve = true;
 	bInfiniteAmmo = true;
-	bShowPelletTracers = true;
+	bShowPelletTracers = false;
 	PelletTracerDuration = 0.18f;
 	PelletTracerThickness = 2.5f;
 	PelletTracerColor = FColor(255, 212, 64);
-	MuzzleFlashScale = 0.35f;
+	MuzzleFlashScale = 1.0f;
 	bDrawDebugTraces = false;
 	DebugTraceDuration = 1.0f;
 
 	CurrentAmmo = MaxAmmo;
 	LastFireTime = -1000.0f;
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> MuzzleFlashAsset(TEXT("/Game/StarterContent/Particles/P_Sparks.P_Sparks"));
-	if (MuzzleFlashAsset.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> RocketMuzzleAsset(TEXT("/Game/sA_Megapack_v1/sA_ShootingVfxPack/FX/NiagaraSystems/NS_ROCKET_Muzzle.NS_ROCKET_Muzzle"));
+	if (RocketMuzzleAsset.Succeeded())
 	{
-		MuzzleFlashEffect = MuzzleFlashAsset.Object;
+		MuzzleFlashSystem = RocketMuzzleAsset.Object;
 	}
 }
 
@@ -146,11 +146,8 @@ void URussellShotgunComponent::SpawnMuzzleFX(UWorld* World, const FVector& Visua
 		return;
 	}
 
-	if (MuzzleFlashEffect)
+	if (MuzzleFlashSystem)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(World, MuzzleFlashEffect, VisualStart, AimRotation, FVector(MuzzleFlashScale), true);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, MuzzleFlashSystem, VisualStart, AimRotation, FVector(MuzzleFlashScale), true, true);
 	}
-
-	DrawDebugSphere(World, VisualStart, 8.0f, 12, FColor::Orange, false, 0.08f, 0, 1.5f);
-	DrawDebugDirectionalArrow(World, VisualStart, VisualStart + AimRotation.Vector() * 38.0f, 10.0f, FColor(255, 132, 24), false, 0.08f, 0, 1.5f);
 }

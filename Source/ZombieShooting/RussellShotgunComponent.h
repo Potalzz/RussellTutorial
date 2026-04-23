@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "RussellShotgunComponent.generated.h"
 
-class UParticleSystem;
+class UNiagaraSystem;
 
 UCLASS(ClassGroup=(Russell), meta=(BlueprintSpawnableComponent))
 class ZOMBIESHOOTING_API URussellShotgunComponent : public UActorComponent
@@ -55,7 +55,7 @@ public:
 	FColor PelletTracerColor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun|FX")
-	TObjectPtr<UParticleSystem> MuzzleFlashEffect;
+	TObjectPtr<UNiagaraSystem> MuzzleFlashSystem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shotgun|FX", meta = (ClampMin = "0.01"))
 	float MuzzleFlashScale;
